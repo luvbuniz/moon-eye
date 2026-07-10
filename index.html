@@ -1459,6 +1459,7 @@ let musicStarted = false;
 let musicNodes = [];
 let musicMaster = null;
 let musicTimer = null;
+const MUSIC_VOL = 0.42; // master volume (louder & clear)
 
 // Hirajōshi / in-sen flavored pentatonic (relaxing Japanese feel), A minor-ish
 const SCALE = [
@@ -1478,7 +1479,7 @@ function startMusic() {
   ensureAudio();
   if (musicStarted) {
     if (actx.state === 'suspended') actx.resume();
-    if (musicMaster) musicMaster.gain.setTargetAtTime(musicOn ? 0.12 : 0, actx.currentTime, 0.2);
+    if (musicMaster) musicMaster.gain.setTargetAtTime(musicOn ? MUSIC_VOL : 0, actx.currentTime, 0.2);
     return;
   }
   musicStarted = true;
@@ -1495,21 +1496,22 @@ function startMusic() {
     g.gain.value = vol;
     const f = actx.createBiquadFilter();
     f.type = 'lowpass';
-    f.frequency.value = 900;
+    f.frequency.value = 1200;
     o.connect(f); f.connect(g); g.connect(musicMaster);
     o.start();
     musicNodes.push(o, g, f);
     return { o, g, f };
   }
-  makePad(110, 'sine', 0.22);
-  makePad(110.4, 'sine', 0.16);
-  makePad(164.8, 'triangle', 0.06); // soft fifth-ish color
+  makePad(110, 'sine', 0.38);
+  makePad(110.4, 'sine', 0.28);
+  makePad(164.8, 'triangle', 0.14);
+  makePad(220, 'sine', 0.08); // soft higher layer
 
   // Gentle noise breeze filtered
   const bufLen = actx.sampleRate * 3;
   const noiseBuf = actx.createBuffer(1, bufLen, actx.sampleRate);
   const nd = noiseBuf.getChannelData(0);
-  for (let i = 0; i < bufLen; i++) nd[i] = (Math.random() * 2 - 1) * 0.15;
+  for (let i = 0; i < bufLen; i++) nd[i] = (Math.random() * 2 - 1) * 0.2;
   const noise = actx.createBufferSource();
   noise.buffer = noiseBuf;
   noise.loop = true;
@@ -1518,27 +1520,25 @@ function startMusic() {
   nf.frequency.value = 600;
   nf.Q.value = 0.4;
   const ng = actx.createGain();
-  ng.gain.value = 0.03;
+  ng.gain.value = 0.06;
   noise.connect(nf); nf.connect(ng); ng.connect(musicMaster);
   noise.start();
   musicNodes.push(noise, nf, ng);
 
-  // Fade in soft
-  musicMaster.gain.setTargetAtTime(0.12, actx.currentTime, 1.5);
+  // Fade in
+  musicMaster.gain.setTargetAtTime(MUSIC_VOL, actx.currentTime, 1.2);
 
   // Sparse pentatonic notes (koto-ish plucks via triangle + quick decay)
   let step = 0;
   function scheduleNotes() {
     if (!musicStarted || !musicOn) return;
     const t = actx.currentTime;
-    // play 1–2 notes every ~1.6–2.4s
     const n = 1 + (Math.random() > 0.55 ? 1 : 0);
     for (let i = 0; i < n; i++) {
       const note = SCALE[(step + i * 2 + (Math.random() * 3 | 0)) % SCALE.length];
       const when = t + i * 0.35 + Math.random() * 0.1;
-      pluckNote(note, when, 0.045 + Math.random() * 0.02);
-      // occasional octave sparkle
-      if (Math.random() > 0.75) pluckNote(note * 2, when + 0.05, 0.02);
+      pluckNote(note, when, 0.14 + Math.random() * 0.05);
+      if (Math.random() > 0.75) pluckNote(note * 2, when + 0.05, 0.07);
     }
     step = (step + 1) % SCALE.length;
     const wait = 1600 + Math.random() * 900;
@@ -1560,8 +1560,8 @@ function pluckNote(freq, when, vol) {
   g.gain.exponentialRampToValueAtTime(0.0001, when + 1.8);
   const f = actx.createBiquadFilter();
   f.type = 'lowpass';
-  f.frequency.setValueAtTime(1800, when);
-  f.frequency.exponentialRampToValueAtTime(600, when + 1.2);
+  f.frequency.setValueAtTime(2400, when);
+  f.frequency.exponentialRampToValueAtTime(900, when + 1.2);
   o.connect(f); f.connect(g); g.connect(musicMaster);
   o.start(when);
   o.stop(when + 2);
@@ -1577,17 +1577,16 @@ function toggleMusic() {
     return;
   }
   if (musicMaster) {
-    musicMaster.gain.setTargetAtTime(musicOn ? 0.12 : 0, actx.currentTime, 0.4);
+    musicMaster.gain.setTargetAtTime(musicOn ? MUSIC_VOL : 0, actx.currentTime, 0.4);
   }
   if (!musicOn && musicTimer) {
     clearTimeout(musicTimer);
     musicTimer = null;
   } else if (musicOn && !musicTimer) {
-    // resume sparse melody
     (function loop() {
       if (!musicOn) { musicTimer = null; return; }
       const n = SCALE[(Math.random() * SCALE.length) | 0];
-      pluckNote(n, actx.currentTime, 0.04);
+      pluckNote(n, actx.currentTime, 0.12);
       musicTimer = setTimeout(loop, 1600 + Math.random() * 900);
     })();
   }
