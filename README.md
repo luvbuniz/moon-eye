@@ -57,6 +57,7 @@ It was designed from a kid’s wish list: pink everything, animals, a Search but
 | **E** | Eat selected food |
 | **Tab** or **Search** | Open full catalog |
 | **Day/Night** button | Toggle sun ☀️ and moon 🌙 |
+| **Music** button | Soft free Japanese-style ambient on/off 🎐 |
 | **Esc** | Unlock mouse / close search |
 
 ---
