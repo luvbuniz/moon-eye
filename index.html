@@ -115,6 +115,58 @@
     .tool-btn.secondary {
       background: linear-gradient(145deg, #c9a0ff, #8ec8ff);
     }
+    .tool-btn.fly-on {
+      background: linear-gradient(145deg, #7ad7ff, #c070ff);
+      box-shadow: 0 0 20px rgba(120,200,255,0.55), 0 6px 18px rgba(200,60,150,0.35);
+      animation: flyPulse 1.2s ease-in-out infinite;
+    }
+    @keyframes flyPulse {
+      50% { transform: scale(1.04); box-shadow: 0 0 28px rgba(160,220,255,0.75); }
+    }
+
+    /* Always-visible controls sign (left) */
+    #controlSign {
+      position: absolute; top: 70px; left: 14px;
+      width: min(220px, 34vw);
+      background: linear-gradient(165deg, rgba(50,12,40,0.88), rgba(30,8,35,0.92));
+      border: 2px solid rgba(255, 180, 220, 0.55);
+      border-radius: 18px; padding: 12px 13px;
+      box-shadow: 0 10px 28px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.1);
+      pointer-events: none;
+    }
+    #controlSign .sign-title {
+      font-size: 0.72rem; font-weight: 900; letter-spacing: 0.14em; color: #ffb0d8;
+      text-align: center; margin-bottom: 8px; padding-bottom: 6px;
+      border-bottom: 1px solid rgba(255,180,220,0.3);
+    }
+    #controlSign .row {
+      display: flex; align-items: flex-start; gap: 8px;
+      font-size: 0.74rem; color: #ffe8f5; line-height: 1.35; margin-bottom: 5px;
+      font-weight: 700;
+    }
+    #controlSign .row:last-child { margin-bottom: 0; }
+    #controlSign .keys { flex-shrink: 0; min-width: 78px; }
+    #controlSign kbd {
+      display: inline-block; min-width: 1.4em; padding: 0.08em 0.35em; margin: 0 1px 2px 0;
+      background: #4a2048; border: 1px solid #ff9ed0; border-bottom-width: 2px; border-radius: 5px;
+      font-family: inherit; font-size: 0.72em; color: #fff; text-align: center; font-weight: 800;
+    }
+    #controlSign .fly-box {
+      margin-top: 8px; padding: 8px 9px; border-radius: 12px;
+      background: linear-gradient(135deg, rgba(100,180,255,0.25), rgba(200,100,255,0.25));
+      border: 1.5px solid rgba(160,210,255,0.55);
+    }
+    #controlSign .fly-box .fly-title {
+      font-size: 0.78rem; font-weight: 900; color: #a8e8ff; margin-bottom: 4px; letter-spacing: 0.04em;
+    }
+    #controlSign .fly-box .row { font-size: 0.72rem; margin-bottom: 3px; }
+    #flyBadge {
+      display: none; margin-top: 6px; text-align: center;
+      font-size: 0.72rem; font-weight: 900; color: #7af0ff;
+      background: rgba(80,160,255,0.25); border-radius: 999px; padding: 4px 8px;
+      border: 1px solid rgba(120,200,255,0.5);
+    }
+    #flyBadge.on { display: block; animation: flyPulse 1s ease-in-out infinite; }
 
     /* Hotbar */
     #hotbar {
@@ -257,11 +309,10 @@
       </p>
       <div class="tips">
         <strong>How to play</strong><br>
-        • <strong>W A S D</strong> move · <strong>Space</strong> jump · <strong>mouse</strong> look<br>
-        • <strong>Left click</strong> place block · <strong>Right click</strong> break<br>
-        • <strong>1–9</strong> hotbar · <strong>E</strong> eat selected food<br>
-        • <strong>Search</strong> shows everything · <strong>Day/Night</strong> toggle<br>
-        • Colorful beds, candles &amp; lights · build houses in the sky!
+        • <strong>W A S D</strong> move · <strong>mouse</strong> look<br>
+        • <strong>F</strong> or <strong>Fly</strong> button to fly! · <strong>Space</strong> up · <strong>C</strong> down<br>
+        • <strong>Left click</strong> place · <strong>Right click</strong> break<br>
+        • <strong>Search</strong> shows everything · controls stay on screen while you play
       </div>
       <button class="pretty" id="startBtn" type="button">✨ Enter Moon Eye ✨</button>
     </div>
@@ -292,14 +343,35 @@
       </div>
     </div>
 
+    <div id="controlSign">
+      <div class="sign-title">✨ HOW TO PLAY</div>
+      <div class="row"><span class="keys"><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd></span><span>Move around</span></div>
+      <div class="row"><span class="keys"><kbd>Mouse</kbd></span><span>Look around</span></div>
+      <div class="row"><span class="keys"><kbd>Space</kbd></span><span>Jump (or fly up)</span></div>
+      <div class="row"><span class="keys"><kbd>Click</kbd></span><span>Left = place block</span></div>
+      <div class="row"><span class="keys"><kbd>Right</kbd></span><span>Right click = break</span></div>
+      <div class="row"><span class="keys"><kbd>1</kbd>–<kbd>9</kbd></span><span>Pick hotbar block</span></div>
+      <div class="row"><span class="keys"><kbd>E</kbd></span><span>Eat food</span></div>
+      <div class="row"><span class="keys"><kbd>Tab</kbd></span><span>Search everything</span></div>
+      <div class="fly-box">
+        <div class="fly-title">🦋 FLY IN THE SKY</div>
+        <div class="row"><span class="keys"><kbd>F</kbd></span><span>Turn fly <b>ON / OFF</b></span></div>
+        <div class="row"><span class="keys"><kbd>Space</kbd></span><span>Fly <b>up</b> higher</span></div>
+        <div class="row"><span class="keys"><kbd>C</kbd></span><span>Fly <b>down</b></span></div>
+        <div class="row"><span class="keys"><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd></span><span>Fly around</span></div>
+        <div id="flyBadge">🦋 FLYING NOW!</div>
+      </div>
+    </div>
+
     <div class="side-tools">
+      <button class="tool-btn clickable" id="flyBtn" type="button">🦋 Fly</button>
       <button class="tool-btn clickable" id="searchBtn" type="button">🔍 Search</button>
       <button class="tool-btn secondary clickable" id="spawnAnimalBtn" type="button">🦊 Spawn Pet</button>
       <button class="tool-btn secondary clickable" id="dayBtn" type="button">☀️ Daytime</button>
       <button class="tool-btn secondary clickable" id="musicBtn" type="button">🎐 Music On</button>
     </div>
 
-    <div class="hint-bar" id="hintBar">Click the game to look around · Left place · Right break · Search shows all items</div>
+    <div class="hint-bar" id="hintBar">Press <b>F</b> or the <b>🦋 Fly</b> button to fly! Space = up · C = down</div>
     <div id="hotbar" class="clickable"></div>
     <div class="help-fab clickable">
       <button type="button" id="helpBtn">❓ Tips</button>
@@ -971,7 +1043,8 @@ document.getElementById('startBtn').onclick = () => {
   canvas.requestPointerLock();
   buildHotbar();
   startMusic();
-  toast('Welcome to Moon Eye! 🌙 Right-side up · soft music playing ✨');
+  updateFlyUI();
+  toast('Welcome! 🌙 Press F or 🦋 Fly to fly in the sky!');
 };
 
 document.addEventListener('pointerlockchange', () => {
@@ -991,7 +1064,7 @@ window.addEventListener('keydown', e => {
     document.exitPointerLock();
   }
   if (e.code === 'KeyE') eatSelected();
-  if (e.code === 'KeyF') player.flying = !player.flying;
+  if (e.code === 'KeyF' && !e.repeat) toggleFly();
   if (e.code === 'KeyQ') breakBlock();
   if (e.code.startsWith('Digit')) {
     const n = parseInt(e.code.replace('Digit', ''), 10);
@@ -1116,11 +1189,16 @@ function updatePlayer(dt) {
   if (wish.lengthSq() > 0) wish.normalize().multiplyScalar(speed);
 
   if (player.flying) {
+    // Creative fly — smooth & easy for sky houses
+    const flySpeed = (keys['ShiftLeft'] || keys['ShiftRight']) ? 12 : 7.5;
+    if (wish.lengthSq() > 0) wish.normalize().multiplyScalar(flySpeed);
     player.vel.x = wish.x;
     player.vel.z = wish.z;
     player.vel.y = 0;
-    if (keys['Space']) player.vel.y = speed;
-    if (keys['KeyC'] || keys['ControlLeft']) player.vel.y = -speed;
+    if (keys['Space']) player.vel.y = flySpeed;
+    if (keys['KeyC'] || keys['ControlLeft'] || keys['ControlRight']) player.vel.y = -flySpeed;
+    // soft float bob so it feels magical
+    if (player.vel.y === 0) player.vel.y = Math.sin(performance.now() * 0.003) * 0.2;
   } else {
     player.vel.x = wish.x;
     player.vel.z = wish.z;
@@ -1426,8 +1504,44 @@ function setDayNight(isNight) {
 document.getElementById('dayBtn').onclick = () => setDayNight(!night);
 document.getElementById('musicBtn').onclick = () => toggleMusic();
 
+function setFlyMode(on) {
+  player.flying = !!on;
+  if (player.flying) {
+    player.vel.y = 0;
+    // lift off a little so she feels it right away
+    player.pos.y += 0.4;
+    toast('🦋 Flying! Space = up · C = down · F or Fly button to land');
+  } else {
+    toast('Landed 💕 Press F or 🦋 Fly to fly again');
+  }
+  updateFlyUI();
+}
+function toggleFly() {
+  setFlyMode(!player.flying);
+}
+function updateFlyUI() {
+  const badge = document.getElementById('flyBadge');
+  const btn = document.getElementById('flyBtn');
+  const hint = document.getElementById('hintBar');
+  if (badge) badge.classList.toggle('on', player.flying);
+  if (btn) {
+    btn.classList.toggle('fly-on', player.flying);
+    btn.textContent = player.flying ? '🦋 Flying!' : '🦋 Fly';
+  }
+  if (hint) {
+    hint.innerHTML = player.flying
+      ? '🦋 <b>FLYING</b> — <b>Space</b> up · <b>C</b> down · <b>WASD</b> move · <b>F</b> to land'
+      : 'Press <b>F</b> or the <b>🦋 Fly</b> button to fly! Space = up · C = down';
+  }
+}
+
+document.getElementById('flyBtn').onclick = () => {
+  // keep pointer usable for the button; re-lock after
+  toggleFly();
+  if (!pointerLocked) canvas.requestPointerLock();
+};
 document.getElementById('helpBtn').onclick = () => {
-  toast('W/A/S/D move · Space jump · F fly · Left place · Right break · E eat · Tab search');
+  toast('🦋 F = fly · Space = up · C = down · WASD move · Left place · Right break · E eat');
 };
 
 // ─── Sounds (Web Audio) ──────────────────────────────────────
