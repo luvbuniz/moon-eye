@@ -307,52 +307,80 @@
       border-radius: 14px; padding: 10px 12px; font-size: 0.8rem;
     }
 
-    /* Tablet / touch controls */
+    /* Tablet / touch controls — big circles, no keyboard needed */
     #touchPad {
       display: none; position: absolute; inset: 0; pointer-events: none; z-index: 15;
     }
     body.touch #touchPad { display: block; }
-    body.touch .crosshair { opacity: 0.35; }
-    body.touch #controlSign {
-      width: min(200px, 40vw); font-size: 0.9em; top: auto; bottom: 100px; max-height: 42vh; overflow-y: auto;
+    body.touch .crosshair { opacity: 0.25; }
+    body.touch #controlSign { display: none !important; } /* hide keyboard keys on tablet */
+    body.touch .help-fab { display: none; }
+    body.touch #hotbar { bottom: 12px; transform: translateX(-50%) scale(0.92); }
+    body.touch .hint-bar {
+      top: auto; bottom: auto; left: 50%; top: 58px; max-width: 90vw;
+      font-size: 0.72rem; white-space: normal;
     }
+    body.touch .side-tools { top: 58px; right: 8px; gap: 8px; }
+    body.touch .tool-btn { padding: 14px 16px; font-size: 0.95rem; min-width: 88px; }
+    #lookDragLayer {
+      display: none; position: absolute; inset: 0; pointer-events: auto; touch-action: none; z-index: 1;
+    }
+    body.touch #lookDragLayer { display: block; }
     .touch-zone {
-      position: absolute; pointer-events: auto; touch-action: none;
-      border-radius: 20px; background: rgba(40,12,35,0.35);
-      border: 2px solid rgba(255,180,220,0.35);
-    }
-    #lookZone {
-      right: 12px; bottom: 100px; width: min(42vw, 200px); height: min(32vh, 180px);
+      position: absolute; pointer-events: auto; touch-action: none; z-index: 16;
+      border-radius: 50%;
+      background: rgba(40,12,35,0.42);
+      border: 3px solid rgba(255,180,220,0.5);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.35);
     }
     #moveZone {
-      left: 12px; bottom: 100px; width: min(42vw, 200px); height: min(32vh, 180px);
+      left: 18px; bottom: 90px;
+      width: min(38vw, 150px); height: min(38vw, 150px);
+    }
+    #lookZone {
+      right: 18px; bottom: 90px;
+      width: min(38vw, 150px); height: min(38vw, 150px);
     }
     .stick-label {
-      position: absolute; top: 6px; left: 0; right: 0; text-align: center;
-      font-size: 0.7rem; font-weight: 800; color: #ffd0e8; opacity: 0.9;
+      position: absolute; top: 10px; left: 0; right: 0; text-align: center;
+      font-size: 0.78rem; font-weight: 900; color: #ffe0f0; letter-spacing: 0.06em;
+      text-shadow: 0 1px 4px #000;
     }
     .stick-base {
-      position: absolute; left: 50%; top: 55%; width: 90px; height: 90px;
-      margin: -45px 0 0 -45px; border-radius: 50%;
-      background: rgba(255,160,210,0.18); border: 2px solid rgba(255,200,230,0.4);
+      position: absolute; left: 50%; top: 54%; width: 72%; height: 72%;
+      margin: 0; transform: translate(-50%, -50%); border-radius: 50%;
+      background: rgba(255,160,210,0.15); border: 2px solid rgba(255,200,230,0.35);
     }
     .stick-knob {
-      position: absolute; left: 50%; top: 55%; width: 42px; height: 42px;
-      margin: -21px 0 0 -21px; border-radius: 50%;
+      position: absolute; left: 50%; top: 54%; width: 38%; height: 38%;
+      margin: 0; transform: translate(-50%, -50%); border-radius: 50%;
       background: linear-gradient(145deg, #ff8ec8, #d070ff);
-      border: 2px solid rgba(255,255,255,0.5);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      border: 3px solid rgba(255,255,255,0.55);
+      box-shadow: 0 4px 14px rgba(0,0,0,0.35);
+      will-change: transform;
     }
     #touchActions {
-      position: absolute; right: 12px; bottom: 12px; display: flex; gap: 10px; pointer-events: auto;
+      position: absolute; right: 12px; bottom: 12px;
+      display: flex; flex-wrap: wrap; gap: 10px; max-width: 50vw;
+      pointer-events: auto; z-index: 16; justify-content: flex-end;
     }
+    #touchActionsLeft {
+      position: absolute; left: 12px; bottom: 12px;
+      display: none; flex-wrap: wrap; gap: 10px; max-width: 48vw;
+      pointer-events: auto; z-index: 16;
+    }
+    body.touch #touchActionsLeft { display: flex; }
     .tact {
-      width: 64px; height: 64px; border-radius: 18px; border: 2px solid rgba(255,255,255,0.45);
+      width: 70px; height: 70px; border-radius: 50%; border: 3px solid rgba(255,255,255,0.5);
       background: linear-gradient(145deg, #ff8ec8, #d070ff); color: #fff;
-      font-weight: 900; font-size: 0.72rem; font-family: inherit;
-      box-shadow: 0 6px 16px rgba(0,0,0,0.3); pointer-events: auto;
+      font-weight: 900; font-size: 0.7rem; font-family: inherit; line-height: 1.15;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.35); pointer-events: auto;
+      -webkit-tap-highlight-color: transparent; user-select: none;
     }
+    .tact:active { transform: scale(0.94); }
     .tact.alt { background: linear-gradient(145deg, #c9a0ff, #8ec8ff); }
+    .tact.fly { background: linear-gradient(145deg, #7ad7ff, #c070ff); }
+    .tact.wide { width: 78px; border-radius: 20px; }
     .install-hint {
       font-size: 0.82rem; color: #8a4070; margin-top: 0.6rem; line-height: 1.4;
     }
@@ -450,7 +478,7 @@
       </div>
     </div>
 
-    <div id="controlSign">
+    <div id="controlSign" class="desktop-only">
       <div class="sign-title">✨ HOW TO PLAY</div>
       <div class="row"><span class="keys"><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd></span><span>Move around</span></div>
       <div class="row"><span class="keys"><kbd>Mouse</kbd></span><span>Look around</span></div>
@@ -478,13 +506,14 @@
       <button class="tool-btn secondary clickable" id="musicBtn" type="button">🎐 Music On</button>
     </div>
 
-    <div class="hint-bar" id="hintBar">Press <b>F</b> or the <b>🦋 Fly</b> button to fly! Space = up · C = down</div>
+    <div class="hint-bar" id="hintBar">Left circle = move · Right circle = look · Or drag finger on the screen</div>
     <div id="hotbar" class="clickable"></div>
-    <div class="help-fab clickable">
+    <div class="help-fab clickable desktop-only">
       <button type="button" id="helpBtn">❓ Tips</button>
     </div>
 
     <div id="touchPad">
+      <div id="lookDragLayer"></div>
       <div class="touch-zone" id="moveZone">
         <div class="stick-label">MOVE</div>
         <div class="stick-base"></div>
@@ -495,11 +524,16 @@
         <div class="stick-base"></div>
         <div class="stick-knob" id="lookKnob"></div>
       </div>
+      <div id="touchActionsLeft">
+        <button type="button" class="tact fly" id="touchFly">🦋<br>FLY</button>
+        <button type="button" class="tact alt" id="touchCenter">👀<br>CENTER</button>
+        <button type="button" class="tact alt" id="touchSearch">🔍<br>SEARCH</button>
+      </div>
       <div id="touchActions">
-        <button type="button" class="tact alt" id="touchJump">JUMP<br>↑</button>
-        <button type="button" class="tact alt" id="touchDown">DOWN<br>↓</button>
-        <button type="button" class="tact" id="touchPlace">PLACE<br>＋</button>
-        <button type="button" class="tact alt" id="touchBreak">BREAK<br>✕</button>
+        <button type="button" class="tact alt" id="touchJump">⬆️<br>UP</button>
+        <button type="button" class="tact alt" id="touchDown">⬇️<br>DOWN</button>
+        <button type="button" class="tact" id="touchPlace">➕<br>PLACE</button>
+        <button type="button" class="tact alt" id="touchBreak">✕<br>BREAK</button>
       </div>
     </div>
   </div>
@@ -1474,6 +1508,9 @@ function loadGame() {
       player.pos.set(data.player.x, data.player.y, data.player.z);
       player.yaw = data.player.yaw || 0;
       player.pitch = data.player.pitch || 0;
+      // never reload stuck sky stare
+      if (Math.abs(player.pitch) > 0.75) player.pitch = 0;
+      player.pitch = Math.max(-1.15, Math.min(1.15, player.pitch));
       player.flying = !!data.player.flying;
       player.hearts = data.player.hearts ?? 5;
       player.hunger = data.player.hunger ?? 5;
@@ -1537,8 +1574,28 @@ scene.add(starField);
   starField.visible = false;
 }
 
-const isTouchDevice = matchMedia('(pointer: coarse)').matches || 'ontouchstart' in window;
-if (isTouchDevice) document.body.classList.add('touch');
+const isTouchDevice = (
+  matchMedia('(pointer: coarse)').matches ||
+  matchMedia('(hover: none)').matches ||
+  navigator.maxTouchPoints > 1 ||
+  'ontouchstart' in window ||
+  /Android|iPad|iPhone|Tablet|Mobile/i.test(navigator.userAgent)
+);
+if (isTouchDevice) {
+  document.body.classList.add('touch');
+  document.querySelectorAll('.desktop-only').forEach(el => { el.style.display = 'none'; });
+}
+
+const MAX_PITCH = 1.15;
+function clampPitch() {
+  player.pitch = Math.max(-MAX_PITCH, Math.min(MAX_PITCH, player.pitch));
+}
+function centerLook() {
+  player.pitch = 0;
+  clampPitch();
+  applyCameraOrientation();
+  toast('👀 Looking straight ahead!');
+}
 
 // Prefill continue button if this tablet has a save
 if (hasSave()) {
@@ -1564,6 +1621,10 @@ document.getElementById('startBtn').onclick = () => {
     player.pitch = 0;
     player.pos.set(0.5, 6, 0.5);
     player.vel.set(0, 0, 0);
+  } else {
+    // Fix stuck looking at sky from old saves
+    clampPitch();
+    if (Math.abs(player.pitch) > 0.75) player.pitch = 0;
   }
   applyCameraOrientation();
   camera.position.set(player.pos.x, player.pos.y + 1.45, player.pos.z);
@@ -1573,9 +1634,15 @@ document.getElementById('startBtn').onclick = () => {
   updateFlyUI();
   updateStatus();
   saveGame(true);
-  toast(loaded
-    ? `Welcome back, ${character.name}! 💾 Loaded this tablet’s world`
-    : `Hi ${character.name}! 🌙 Your world will save on this tablet`);
+  const hint = document.getElementById('hintBar');
+  if (isTouchDevice && hint) {
+    hint.innerHTML = '🔵 Left = <b>MOVE</b> · 🔵 Right = <b>LOOK</b> · Drag screen · 👀 CENTER if stuck on sky';
+  }
+  toast(isTouchDevice
+    ? `Hi ${character.name}! Use the pink circles — 👀 CENTER if stuck looking up`
+    : (loaded
+      ? `Welcome back, ${character.name}! 💾 Loaded this tablet’s world`
+      : `Hi ${character.name}! 🌙 Your world will save on this tablet`));
 };
 
 document.addEventListener('pointerlockchange', () => {
@@ -1588,7 +1655,7 @@ canvas.addEventListener('click', () => {
   if (!isTouchDevice && !pointerLocked) canvas.requestPointerLock();
 });
 
-// ─── Touch controls (tablets) ────────────────────────────────
+// ─── Touch controls (tablets) — big circles + finger drag ────
 const touchMove = { x: 0, z: 0 };
 const touchLook = { x: 0, y: 0 };
 function bindStick(zoneId, knobId, onMove, onEnd) {
@@ -1598,7 +1665,11 @@ function bindStick(zoneId, knobId, onMove, onEnd) {
   let active = null;
   function center() {
     const r = zone.getBoundingClientRect();
-    return { x: r.left + r.width / 2, y: r.top + r.height * 0.55, max: Math.min(r.width, r.height) * 0.28 };
+    return {
+      x: r.left + r.width / 2,
+      y: r.top + r.height * 0.54,
+      max: Math.min(r.width, r.height) * 0.32,
+    };
   }
   function handle(clientX, clientY) {
     const c = center();
@@ -1606,26 +1677,29 @@ function bindStick(zoneId, knobId, onMove, onEnd) {
     let dy = clientY - c.y;
     const len = Math.hypot(dx, dy) || 1;
     if (len > c.max) { dx = (dx / len) * c.max; dy = (dy / len) * c.max; }
-    knob.style.transform = `translate(${dx}px, ${dy}px)`;
-    onMove(dx / c.max, dy / c.max);
+    knob.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
+    const nx = Math.abs(dx / c.max) < 0.12 ? 0 : dx / c.max;
+    const ny = Math.abs(dy / c.max) < 0.12 ? 0 : dy / c.max;
+    onMove(nx, ny);
+  }
+  function end(e) {
+    if (active !== e.pointerId) return;
+    active = null;
+    knob.style.transform = 'translate(-50%, -50%)';
+    onEnd();
   }
   zone.addEventListener('pointerdown', e => {
     active = e.pointerId;
     zone.setPointerCapture(e.pointerId);
     handle(e.clientX, e.clientY);
     e.preventDefault();
+    e.stopPropagation();
   });
   zone.addEventListener('pointermove', e => {
     if (active !== e.pointerId) return;
     handle(e.clientX, e.clientY);
     e.preventDefault();
   });
-  function end(e) {
-    if (active !== e.pointerId) return;
-    active = null;
-    knob.style.transform = 'translate(0,0)';
-    onEnd();
-  }
   zone.addEventListener('pointerup', end);
   zone.addEventListener('pointercancel', end);
 }
@@ -1638,10 +1712,35 @@ bindStick('lookZone', 'lookKnob', (x, y) => {
   touchLook.y = y;
 }, () => { touchLook.x = 0; touchLook.y = 0; });
 
+// Drag finger on the middle of the screen to look around
+(function bindLookDrag() {
+  const layer = document.getElementById('lookDragLayer');
+  if (!layer) return;
+  let pid = null, lx = 0, ly = 0;
+  layer.addEventListener('pointerdown', e => {
+    pid = e.pointerId;
+    lx = e.clientX; ly = e.clientY;
+    try { layer.setPointerCapture(e.pointerId); } catch {}
+    e.preventDefault();
+  });
+  layer.addEventListener('pointermove', e => {
+    if (pid !== e.pointerId) return;
+    const dx = e.clientX - lx;
+    const dy = e.clientY - ly;
+    lx = e.clientX; ly = e.clientY;
+    player.yaw -= dx * 0.0055;
+    player.pitch -= dy * 0.0045;
+    clampPitch();
+    e.preventDefault();
+  });
+  layer.addEventListener('pointerup', e => { if (pid === e.pointerId) pid = null; });
+  layer.addEventListener('pointercancel', e => { if (pid === e.pointerId) pid = null; });
+})();
+
 function bindHold(btnId, code) {
   const el = document.getElementById(btnId);
   if (!el) return;
-  const down = e => { keys[code] = true; e.preventDefault(); };
+  const down = e => { keys[code] = true; e.preventDefault(); e.stopPropagation(); };
   const up = e => { keys[code] = false; e.preventDefault(); };
   el.addEventListener('pointerdown', down);
   el.addEventListener('pointerup', up);
@@ -1650,8 +1749,11 @@ function bindHold(btnId, code) {
 }
 bindHold('touchJump', 'Space');
 bindHold('touchDown', 'KeyC');
-document.getElementById('touchPlace')?.addEventListener('pointerdown', e => { placeBlock(); e.preventDefault(); });
-document.getElementById('touchBreak')?.addEventListener('pointerdown', e => { breakBlock(); e.preventDefault(); });
+document.getElementById('touchPlace')?.addEventListener('pointerdown', e => { placeBlock(); e.preventDefault(); e.stopPropagation(); });
+document.getElementById('touchBreak')?.addEventListener('pointerdown', e => { breakBlock(); e.preventDefault(); e.stopPropagation(); });
+document.getElementById('touchFly')?.addEventListener('pointerdown', e => { toggleFly(); e.preventDefault(); e.stopPropagation(); });
+document.getElementById('touchCenter')?.addEventListener('pointerdown', e => { centerLook(); e.preventDefault(); e.stopPropagation(); });
+document.getElementById('touchSearch')?.addEventListener('pointerdown', e => { openSearch(); e.preventDefault(); e.stopPropagation(); });
 
 window.addEventListener('keydown', e => {
   keys[e.code] = true;
@@ -1674,16 +1776,14 @@ window.addEventListener('keydown', e => {
 window.addEventListener('keyup', e => { keys[e.code] = false; });
 
 document.addEventListener('mousemove', e => {
-  if (!pointerLocked) return;
-  // Mouse look — clamped so you can never flip upside down
+  if (!pointerLocked || isTouchDevice) return;
   player.yaw -= e.movementX * 0.0022;
   player.pitch -= e.movementY * 0.0022;
-  const maxPitch = Math.PI / 2 - 0.08; // just under 90° — never invert
-  player.pitch = Math.max(-maxPitch, Math.min(maxPitch, player.pitch));
+  clampPitch();
 });
 
 canvas.addEventListener('mousedown', e => {
-  if (!pointerLocked) return;
+  if (!pointerLocked || isTouchDevice) return;
   if (e.button === 0) placeBlock();
   if (e.button === 2) breakBlock();
 });
@@ -1779,12 +1879,11 @@ function solidAt(x, y, z) {
 }
 
 function updatePlayer(dt) {
-  // Touch look (tablets)
+  // Touch look stick — up on circle = look up (gentle)
   if (isTouchDevice && (touchLook.x || touchLook.y)) {
-    player.yaw -= touchLook.x * 1.8 * dt;
-    player.pitch -= touchLook.y * 1.4 * dt;
-    const maxPitch = Math.PI / 2 - 0.08;
-    player.pitch = Math.max(-maxPitch, Math.min(maxPitch, player.pitch));
+    player.yaw -= touchLook.x * 2.4 * dt;
+    player.pitch -= touchLook.y * 2.0 * dt; // stick up (neg y) raises pitch
+    clampPitch();
   }
 
   const speed = keys['ShiftLeft'] || keys['ShiftRight'] ? 9 : 5.5;
@@ -1795,7 +1894,7 @@ function updatePlayer(dt) {
   if (keys['KeyS'] || keys['ArrowDown']) wish.sub(forward);
   if (keys['KeyA'] || keys['ArrowLeft']) wish.sub(right);
   if (keys['KeyD'] || keys['ArrowRight']) wish.add(right);
-  // Touch move stick (forward is -Y on stick / up on pad)
+  // Touch move: stick up (negative y / z) = walk forward
   if (isTouchDevice && (touchMove.x || touchMove.z)) {
     wish.add(forward.clone().multiplyScalar(-touchMove.z));
     wish.add(right.clone().multiplyScalar(touchMove.x));
@@ -2148,16 +2247,21 @@ function updateFlyUI() {
     btn.textContent = player.flying ? '🦋 Flying!' : '🦋 Fly';
   }
   if (hint) {
-    hint.innerHTML = player.flying
-      ? '🦋 <b>FLYING</b> — <b>Space</b> up · <b>C</b> down · <b>WASD</b> move · <b>F</b> to land'
-      : 'Press <b>F</b> or the <b>🦋 Fly</b> button to fly! Space = up · C = down';
+    if (isTouchDevice) {
+      hint.innerHTML = player.flying
+        ? '🦋 <b>FLYING</b> — ⬆️ up · ⬇️ down · MOVE circle · 👀 CENTER if stuck'
+        : 'Left circle <b>MOVE</b> · Right circle <b>LOOK</b> · Drag screen · 🦋 FLY · 👀 CENTER';
+    } else {
+      hint.innerHTML = player.flying
+        ? '🦋 <b>FLYING</b> — <b>Space</b> up · <b>C</b> down · <b>WASD</b> move · <b>F</b> to land'
+        : 'Press <b>F</b> or the <b>🦋 Fly</b> button to fly! Space = up · C = down';
+    }
   }
 }
 
 document.getElementById('flyBtn').onclick = () => {
-  // keep pointer usable for the button; re-lock after
   toggleFly();
-  if (!pointerLocked) canvas.requestPointerLock();
+  if (!isTouchDevice && !pointerLocked) canvas.requestPointerLock();
 };
 document.getElementById('helpBtn').onclick = () => {
   toast('🦋 F = fly · Space = up · C = down · WASD move · Left place · Right break · E eat');
