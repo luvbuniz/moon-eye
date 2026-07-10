@@ -1,5 +1,5 @@
-// Moon Eye — simple offline shell for home-screen install
-const CACHE = 'mooneye-v1';
+// Moon Eye — offline cache for tablets (after first online load)
+const CACHE = 'mooneye-offline-v3';
 const ASSETS = [
   './',
   './index.html',
@@ -7,12 +7,17 @@ const ASSETS = [
   './favicon.png',
   './icon-180.png',
   './icon-192.png',
-  './icon-512.png'
+  './icon-512.png',
+  './icon.svg',
+  './vendor/three.module.js',
+  './README.md'
 ];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE).then((cache) => cache.addAll(ASSETS)).then(() => self.skipWaiting())
+    caches.open(CACHE)
+      .then((cache) => cache.addAll(ASSETS))
+      .then(() => self.skipWaiting())
   );
 });
 
@@ -29,12 +34,17 @@ self.addEventListener('fetch', (event) => {
   if (req.method !== 'GET') return;
   event.respondWith(
     caches.match(req).then((cached) => {
-      const net = fetch(req).then((res) => {
-        const copy = res.clone();
-        caches.open(CACHE).then((cache) => cache.put(req, copy)).catch(() => {});
+      if (cached) return cached;
+      return fetch(req).then((res) => {
+        if (res && res.ok) {
+          const copy = res.clone();
+          caches.open(CACHE).then((cache) => cache.put(req, copy)).catch(() => {});
+        }
         return res;
-      }).catch(() => cached);
-      return cached || net;
+      }).catch(() => {
+        if (req.mode === 'navigate') return caches.match('./index.html');
+        return cached;
+      });
     })
   );
 });
