@@ -296,6 +296,7 @@
       <button class="tool-btn clickable" id="searchBtn" type="button">🔍 Search</button>
       <button class="tool-btn secondary clickable" id="spawnAnimalBtn" type="button">🦊 Spawn Pet</button>
       <button class="tool-btn secondary clickable" id="dayBtn" type="button">☀️ Daytime</button>
+      <button class="tool-btn secondary clickable" id="musicBtn" type="button">🎐 Music On</button>
     </div>
 
     <div class="hint-bar" id="hintBar">Click the game to look around · Left place · Right break · Search shows all items</div>
@@ -891,13 +892,38 @@ spawnAnimal('fox', 3, 18);
 const player = {
   pos: new THREE.Vector3(0.5, 6, 0.5),
   vel: new THREE.Vector3(),
+  // Three.js camera looks down -Z when yaw=0, pitch=0 — stay right-side up always
   yaw: 0,
-  pitch: -0.15,
+  pitch: 0,
   onGround: false,
   hearts: 5,
   hunger: 5,
-  flying: false, // creative-ish double jump fly optional
+  flying: false,
 };
+
+/** Horizontal look / move direction (right-side-up world). */
+function lookForwardXZ() {
+  return new THREE.Vector3(-Math.sin(player.yaw), 0, -Math.cos(player.yaw));
+}
+function lookRightXZ() {
+  return new THREE.Vector3(Math.cos(player.yaw), 0, -Math.sin(player.yaw));
+}
+/** Full 3D aim ray (for placing blocks) matching camera. */
+function lookAimDir() {
+  const cp = Math.cos(player.pitch);
+  return new THREE.Vector3(
+    -Math.sin(player.yaw) * cp,
+    Math.sin(player.pitch),
+    -Math.cos(player.yaw) * cp
+  ).normalize();
+}
+function applyCameraOrientation() {
+  // Always force upright: only yaw + pitch, never roll
+  camera.rotation.order = 'YXZ';
+  camera.rotation.x = player.pitch;
+  camera.rotation.y = player.yaw;
+  camera.rotation.z = 0;
+}
 
 const HOTBAR_DEFAULT = [
   'pink_dream', 'bed_pink', 'bed_purple', 'candle_pink', 'fairy_lamp',
@@ -935,9 +961,17 @@ scene.add(starField);
 document.getElementById('startBtn').onclick = () => {
   document.getElementById('overlay').classList.add('hidden');
   document.getElementById('hud').classList.add('show');
+  // Reset upright view when entering the world
+  player.yaw = 0;
+  player.pitch = 0;
+  player.pos.set(0.5, 6, 0.5);
+  player.vel.set(0, 0, 0);
+  applyCameraOrientation();
+  camera.position.set(player.pos.x, player.pos.y + 1.45, player.pos.z);
   canvas.requestPointerLock();
   buildHotbar();
-  toast('Welcome to Moon Eye! 🌙 Press Search to see everything ✨');
+  startMusic();
+  toast('Welcome to Moon Eye! 🌙 Right-side up · soft music playing ✨');
 };
 
 document.addEventListener('pointerlockchange', () => {
@@ -972,9 +1006,11 @@ window.addEventListener('keyup', e => { keys[e.code] = false; });
 
 document.addEventListener('mousemove', e => {
   if (!pointerLocked) return;
+  // Mouse look — clamped so you can never flip upside down
   player.yaw -= e.movementX * 0.0022;
   player.pitch -= e.movementY * 0.0022;
-  player.pitch = Math.max(-1.45, Math.min(1.45, player.pitch));
+  const maxPitch = Math.PI / 2 - 0.08; // just under 90° — never invert
+  player.pitch = Math.max(-maxPitch, Math.min(maxPitch, player.pitch));
 });
 
 canvas.addEventListener('mousedown', e => {
@@ -989,11 +1025,7 @@ const _ray = new THREE.Raycaster();
 const _mouse = new THREE.Vector2(0, 0);
 
 function raycastBlock(maxDist = 7) {
-  const dir = new THREE.Vector3(
-    Math.sin(player.yaw) * Math.cos(player.pitch),
-    Math.sin(player.pitch),
-    Math.cos(player.yaw) * Math.cos(player.pitch)
-  ).normalize();
+  const dir = lookAimDir();
   const origin = camera.position.clone();
 
   // DDA voxel traversal
@@ -1074,13 +1106,13 @@ function solidAt(x, y, z) {
 
 function updatePlayer(dt) {
   const speed = keys['ShiftLeft'] || keys['ShiftRight'] ? 9 : 5.5;
-  const forward = new THREE.Vector3(Math.sin(player.yaw), 0, Math.cos(player.yaw));
-  const right = new THREE.Vector3(Math.cos(player.yaw), 0, -Math.sin(player.yaw));
+  const forward = lookForwardXZ();
+  const right = lookRightXZ();
   const wish = new THREE.Vector3();
   if (keys['KeyW'] || keys['ArrowUp']) wish.add(forward);
   if (keys['KeyS'] || keys['ArrowDown']) wish.sub(forward);
-  if (keys['KeyA'] || keys['ArrowLeft']) wish.add(right);
-  if (keys['KeyD'] || keys['ArrowRight']) wish.sub(right);
+  if (keys['KeyA'] || keys['ArrowLeft']) wish.sub(right);
+  if (keys['KeyD'] || keys['ArrowRight']) wish.add(right);
   if (wish.lengthSq() > 0) wish.normalize().multiplyScalar(speed);
 
   if (player.flying) {
@@ -1130,11 +1162,9 @@ function updatePlayer(dt) {
     toast('Whoops! Back to the meadow 💕');
   }
 
-  // camera
+  // camera — always right-side up (no roll)
   camera.position.set(player.pos.x, player.pos.y + 1.45, player.pos.z);
-  camera.rotation.order = 'YXZ';
-  camera.rotation.y = player.yaw;
-  camera.rotation.x = player.pitch;
+  applyCameraOrientation();
 }
 
 function collides(pos, r, h) {
@@ -1335,10 +1365,8 @@ function renderSearch() {
         <div class="tag">animal · spawn</div>
       `;
       card.onclick = () => {
-        const ang = player.yaw;
-        const sx = player.pos.x + Math.sin(ang) * 3;
-        const sz = player.pos.z + Math.cos(ang) * 3;
-        spawnAnimal(type, sx, sz);
+        const f = lookForwardXZ();
+        spawnAnimal(type, player.pos.x + f.x * 3, player.pos.z + f.z * 3);
         toast(`${def.emoji} A ${def.name} appeared!`);
         closeSearch();
       };
@@ -1361,8 +1389,8 @@ document.getElementById('searchPanel').addEventListener('click', e => {
 document.getElementById('spawnAnimalBtn').onclick = () => {
   const types = Object.keys(ANIMALS);
   const type = types[(Math.random() * types.length) | 0];
-  const ang = player.yaw;
-  spawnAnimal(type, player.pos.x + Math.sin(ang) * 3, player.pos.z + Math.cos(ang) * 3);
+  const f = lookForwardXZ();
+  spawnAnimal(type, player.pos.x + f.x * 3, player.pos.z + f.z * 3);
   toast(`${ANIMALS[type].emoji} ${ANIMALS[type].name} friend!`);
 };
 
@@ -1396,6 +1424,7 @@ function setDayNight(isNight) {
   }
 }
 document.getElementById('dayBtn').onclick = () => setDayNight(!night);
+document.getElementById('musicBtn').onclick = () => toggleMusic();
 
 document.getElementById('helpBtn').onclick = () => {
   toast('W/A/S/D move · Space jump · F fly · Left place · Right break · E eat · Tab search');
@@ -1406,6 +1435,7 @@ let actx;
 function ensureAudio() {
   if (!actx) actx = new (window.AudioContext || window.webkitAudioContext)();
   if (actx.state === 'suspended') actx.resume();
+  return actx;
 }
 function blip(freq, dur, type = 'sine', vol = 0.08) {
   ensureAudio();
@@ -1422,7 +1452,153 @@ function playPlace() { blip(520, 0.08, 'triangle', 0.06); blip(780, 0.1, 'sine',
 function playBreak() { blip(180, 0.1, 'square', 0.05); }
 function playEat() { blip(400, 0.08, 'sine', 0.07); blip(600, 0.12, 'sine', 0.05); }
 
-document.getElementById('startBtn').addEventListener('click', ensureAudio);
+// ─── Free relaxing Japanese-inspired ambient music (procedural) ──
+// Soft pentatonic melody + warm pad. No external files needed — free forever.
+let musicOn = true;
+let musicStarted = false;
+let musicNodes = [];
+let musicMaster = null;
+let musicTimer = null;
+
+// Hirajōshi / in-sen flavored pentatonic (relaxing Japanese feel), A minor-ish
+const SCALE = [
+  220.00, // A3
+  233.08, // Bb
+  277.18, // C#
+  293.66, // D
+  349.23, // F
+  440.00, // A4
+  466.16, // Bb
+  554.37, // C#
+  587.33, // D
+  698.46, // F
+];
+
+function startMusic() {
+  ensureAudio();
+  if (musicStarted) {
+    if (actx.state === 'suspended') actx.resume();
+    if (musicMaster) musicMaster.gain.setTargetAtTime(musicOn ? 0.12 : 0, actx.currentTime, 0.2);
+    return;
+  }
+  musicStarted = true;
+  musicMaster = actx.createGain();
+  musicMaster.gain.value = 0;
+  musicMaster.connect(actx.destination);
+
+  // Warm low pad (two detuned sines)
+  function makePad(freq, type, vol) {
+    const o = actx.createOscillator();
+    o.type = type;
+    o.frequency.value = freq;
+    const g = actx.createGain();
+    g.gain.value = vol;
+    const f = actx.createBiquadFilter();
+    f.type = 'lowpass';
+    f.frequency.value = 900;
+    o.connect(f); f.connect(g); g.connect(musicMaster);
+    o.start();
+    musicNodes.push(o, g, f);
+    return { o, g, f };
+  }
+  makePad(110, 'sine', 0.22);
+  makePad(110.4, 'sine', 0.16);
+  makePad(164.8, 'triangle', 0.06); // soft fifth-ish color
+
+  // Gentle noise breeze filtered
+  const bufLen = actx.sampleRate * 3;
+  const noiseBuf = actx.createBuffer(1, bufLen, actx.sampleRate);
+  const nd = noiseBuf.getChannelData(0);
+  for (let i = 0; i < bufLen; i++) nd[i] = (Math.random() * 2 - 1) * 0.15;
+  const noise = actx.createBufferSource();
+  noise.buffer = noiseBuf;
+  noise.loop = true;
+  const nf = actx.createBiquadFilter();
+  nf.type = 'bandpass';
+  nf.frequency.value = 600;
+  nf.Q.value = 0.4;
+  const ng = actx.createGain();
+  ng.gain.value = 0.03;
+  noise.connect(nf); nf.connect(ng); ng.connect(musicMaster);
+  noise.start();
+  musicNodes.push(noise, nf, ng);
+
+  // Fade in soft
+  musicMaster.gain.setTargetAtTime(0.12, actx.currentTime, 1.5);
+
+  // Sparse pentatonic notes (koto-ish plucks via triangle + quick decay)
+  let step = 0;
+  function scheduleNotes() {
+    if (!musicStarted || !musicOn) return;
+    const t = actx.currentTime;
+    // play 1–2 notes every ~1.6–2.4s
+    const n = 1 + (Math.random() > 0.55 ? 1 : 0);
+    for (let i = 0; i < n; i++) {
+      const note = SCALE[(step + i * 2 + (Math.random() * 3 | 0)) % SCALE.length];
+      const when = t + i * 0.35 + Math.random() * 0.1;
+      pluckNote(note, when, 0.045 + Math.random() * 0.02);
+      // occasional octave sparkle
+      if (Math.random() > 0.75) pluckNote(note * 2, when + 0.05, 0.02);
+    }
+    step = (step + 1) % SCALE.length;
+    const wait = 1600 + Math.random() * 900;
+    musicTimer = setTimeout(scheduleNotes, wait);
+  }
+  scheduleNotes();
+  updateMusicBtn();
+}
+
+function pluckNote(freq, when, vol) {
+  if (!actx || !musicMaster) return;
+  const o = actx.createOscillator();
+  o.type = 'triangle';
+  o.frequency.setValueAtTime(freq, when);
+  o.frequency.exponentialRampToValueAtTime(freq * 0.98, when + 1.2);
+  const g = actx.createGain();
+  g.gain.setValueAtTime(0.0001, when);
+  g.gain.exponentialRampToValueAtTime(vol, when + 0.03);
+  g.gain.exponentialRampToValueAtTime(0.0001, when + 1.8);
+  const f = actx.createBiquadFilter();
+  f.type = 'lowpass';
+  f.frequency.setValueAtTime(1800, when);
+  f.frequency.exponentialRampToValueAtTime(600, when + 1.2);
+  o.connect(f); f.connect(g); g.connect(musicMaster);
+  o.start(when);
+  o.stop(when + 2);
+}
+
+function toggleMusic() {
+  ensureAudio();
+  musicOn = !musicOn;
+  if (!musicStarted) {
+    if (musicOn) startMusic();
+    updateMusicBtn();
+    toast(musicOn ? 'Soft Japanese-style music on 🎐' : 'Music muted 🔇');
+    return;
+  }
+  if (musicMaster) {
+    musicMaster.gain.setTargetAtTime(musicOn ? 0.12 : 0, actx.currentTime, 0.4);
+  }
+  if (!musicOn && musicTimer) {
+    clearTimeout(musicTimer);
+    musicTimer = null;
+  } else if (musicOn && !musicTimer) {
+    // resume sparse melody
+    (function loop() {
+      if (!musicOn) { musicTimer = null; return; }
+      const n = SCALE[(Math.random() * SCALE.length) | 0];
+      pluckNote(n, actx.currentTime, 0.04);
+      musicTimer = setTimeout(loop, 1600 + Math.random() * 900);
+    })();
+  }
+  updateMusicBtn();
+  toast(musicOn ? 'Soft Japanese-style music on 🎐' : 'Music muted 🔇');
+}
+
+function updateMusicBtn() {
+  const b = document.getElementById('musicBtn');
+  if (b) b.textContent = musicOn ? '🎐 Music On' : '🔇 Music Off';
+}
 
 // ─── Floating petals ─────────────────────────────────────────
 const petals = [];
@@ -1477,10 +1653,14 @@ function frame() {
       updateStatus();
     }
   } else if (!document.getElementById('hud').classList.contains('show')) {
-    // title orbit
+    // title orbit — keep camera upright (never roll upside down)
     const t = performance.now() * 0.0002;
     camera.position.set(Math.sin(t) * 25, 12, Math.cos(t) * 25);
+    camera.up.set(0, 1, 0);
     camera.lookAt(0, 4, 0);
+    // kill any accidental roll from lookAt edge cases
+    camera.rotation.order = 'YXZ';
+    camera.rotation.z = 0;
   }
 
   // petals

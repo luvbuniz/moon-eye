@@ -104,10 +104,15 @@ Tip: switch to **night** and light up your house 🕯️
 
 ---
 
+## Music
+
+Soft **free** relaxing music plays when you start — warm pads and gentle Japanese-inspired pentatonic notes (procedural Web Audio, no downloads, no copyright issues). Toggle with the **Music** button anytime.
+
 ## Tech
 
 - Single file game: `index.html`
 - [Three.js](https://threejs.org/) r160 (CDN)
+- Procedural ambient music (Web Audio API)
 - No install for players · GitHub Pages hosting
 
 ---
