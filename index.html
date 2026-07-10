@@ -356,6 +356,26 @@
     .install-hint {
       font-size: 0.82rem; color: #8a4070; margin-top: 0.6rem; line-height: 1.4;
     }
+    .char-box {
+      text-align: left; background: rgba(255,180,220,0.22); border-radius: 14px;
+      padding: 0.75rem 0.9rem; margin-bottom: 1rem; border: 2px solid #ffb0d8;
+    }
+    .char-box h3 { font-size: 0.9rem; color: #d04090; margin-bottom: 0.5rem; }
+    .char-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 0.45rem; align-items: center; }
+    .char-row label { font-size: 0.78rem; font-weight: 800; color: #7a4068; min-width: 70px; }
+    .char-row input[type="text"], .char-row select {
+      flex: 1; min-width: 120px; border: 2px solid #ff9ed0; border-radius: 999px;
+      padding: 0.4rem 0.75rem; font-family: inherit; font-weight: 700; color: #5a2048;
+    }
+    .swatch-pick { display: flex; gap: 6px; flex-wrap: wrap; }
+    .swatch-pick button {
+      width: 28px; height: 28px; border-radius: 50%; border: 2px solid #fff;
+      box-shadow: 0 0 0 1px #ff9ed0; cursor: pointer; padding: 0;
+    }
+    .swatch-pick button.on { box-shadow: 0 0 0 3px #ff4fa0; }
+    #offlineBadge {
+      display: none; margin-top: 0.45rem; font-size: 0.78rem; font-weight: 800; color: #2a8a50;
+    }
   </style>
 </head>
 <body>
@@ -364,22 +384,43 @@
       <div class="moon-logo">🌙 Moon Eye</div>
       <div class="subtitle">A sparkly building world for dreamers</div>
       <p class="blurb">
-        Build pink houses in the sky, plant cherry blossoms &amp; bamboo,
-        pet foxes and pandas, eat yummy food, and fill your world with love.
-        Stack blocks up to the clouds — then put your house on top!
+        Build pink houses, visit the arctic snow, pick flowers everywhere,
+        make your character, and play offline — your world saves on this tablet!
       </p>
+      <div class="char-box">
+        <h3>✨ Make your character</h3>
+        <div class="char-row">
+          <label>Name</label>
+          <input id="charName" type="text" maxlength="16" placeholder="Your name" value="Fiona" />
+        </div>
+        <div class="char-row">
+          <label>Style</label>
+          <select id="charStyle">
+            <option value="girl">Girl</option>
+            <option value="boy">Boy</option>
+            <option value="sparkle">Sparkle friend</option>
+          </select>
+        </div>
+        <div class="char-row">
+          <label>Hair</label>
+          <div class="swatch-pick" id="hairPick"></div>
+        </div>
+        <div class="char-row">
+          <label>Outfit</label>
+          <div class="swatch-pick" id="outfitPick"></div>
+        </div>
+      </div>
       <div class="tips">
         <strong>How to play</strong><br>
-        • <strong>W A S D</strong> move · <strong>mouse</strong> look<br>
-        • <strong>F</strong> or <strong>Fly</strong> button to fly! · <strong>Space</strong> up · <strong>C</strong> down<br>
-        • <strong>Left click</strong> place · <strong>Right click</strong> break<br>
-        • <strong>Search</strong> shows everything · controls stay on screen while you play
+        • <strong>W A S D</strong> move · <strong>F</strong> fly · <strong>Space</strong> up · <strong>C</strong> down<br>
+        • <strong>Search</strong> for doors, fridge, fan, bears, birds &amp; more<br>
+        • 💾 Saves on <b>this tablet</b> · 📴 Works offline after one online load
       </div>
       <button class="pretty" id="startBtn" type="button">✨ Enter Moon Eye ✨</button>
       <p class="install-hint" id="installHint">
-        📱 <b>Tablet tip:</b> In Safari/Chrome, use <b>Share → Add to Home Screen</b>
-        to get the Moon Eye icon on your tablet!
+        📱 <b>Tablet:</b> Share → <b>Add to Home Screen</b> for the Moon Eye icon + offline play
       </p>
+      <p id="offlineBadge">✓ Offline ready — no internet needed</p>
     </div>
   </div>
 
@@ -400,11 +441,12 @@
   <div id="hud">
     <div class="crosshair"></div>
     <div class="topbar">
-      <div class="brand">🌙 Moon Eye</div>
+      <div class="brand">🌙 Moon Eye · <span id="playerNameTag">Fiona</span></div>
       <div class="status-pills">
         <div class="pill hearts" id="hearts">❤️ ❤️ ❤️ ❤️ ❤️</div>
         <div class="pill food" id="hunger">🍎 🍎 🍎 🍎 🍎</div>
         <div class="pill" id="selectedLabel">Pink Dream Block</div>
+        <div class="pill" id="savePill">💾 Auto-save</div>
       </div>
     </div>
 
@@ -465,7 +507,7 @@
   <canvas id="game"></canvas>
 
   <script type="importmap">
-  { "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js" } }
+  { "imports": { "three": "./vendor/three.module.js" } }
   </script>
   <script type="module">
 import * as THREE from 'three';
@@ -532,11 +574,18 @@ const BLOCKS = {
   bamboo:       { name: 'Bamboo',       color: 0x70c050, cat: 'nature', thin: true },
   water:        { name: 'Water',        color: 0x60c0ff, cat: 'nature', transparent: true, opacity: 0.55, shiny: true },
   fence:        { name: 'Cute Fence',   color: 0xe8b898, cat: 'build', fence: true },
-  door:         { name: 'Pretty Door',  color: 0xe8a070, cat: 'build', furniture: 'door' },
+  door:         { name: 'Wood Door',    color: 0xe8a070, cat: 'build', furniture: 'door' },
   door_pink:    { name: 'Pink Door',    color: 0xff90c0, cat: 'build', furniture: 'door' },
   door_purple:  { name: 'Purple Door',  color: 0xb080e0, cat: 'build', furniture: 'door' },
+  door_blue:    { name: 'Blue Door',    color: 0x70b0ff, cat: 'build', furniture: 'door' },
+  door_mint:    { name: 'Mint Door',    color: 0x70e0b0, cat: 'build', furniture: 'door' },
+  door_gold:    { name: 'Gold Door',    color: 0xffd060, cat: 'build', furniture: 'door', shiny: true },
+  door_heart:   { name: 'Heart Door',   color: 0xff6090, cat: 'build', furniture: 'door' },
+  door_rainbow: { name: 'Rainbow Door', color: 0xff88cc, cat: 'build', furniture: 'door', rainbow: true },
   chair:        { name: 'Chair',        color: 0xff9ed0, cat: 'furniture', furniture: 'chair' },
   table:        { name: 'Table',        color: 0xffc0e0, cat: 'furniture', furniture: 'table' },
+  fridge:       { name: 'Fridge',       color: 0xe8f0ff, cat: 'furniture', furniture: 'fridge' },
+  fan:          { name: 'Cute Fan',     color: 0xa0d8ff, cat: 'furniture', furniture: 'fan' },
   vase_pink:    { name: 'Pink Vase',    color: 0xff80b0, cat: 'furniture', furniture: 'vase', flower: 0xff60a0 },
   vase_blue:    { name: 'Blue Vase',    color: 0x80b0ff, cat: 'furniture', furniture: 'vase', flower: 0xffe060 },
   vase_purple:  { name: 'Purple Vase',  color: 0xc090ff, cat: 'furniture', furniture: 'vase', flower: 0xff90d0 },
@@ -573,7 +622,13 @@ const BLOCKS = {
   diamond:      { name: 'Diamond Block', color: 0x7aefe8, cat: 'blocks', shiny: true, emit: 0.45 },
   rainbow:      { name: 'Rainbow',      color: 0xff88cc, cat: 'blocks', shiny: true },
   sand_pink:    { name: 'Pink Sand',    color: 0xffd8c8, cat: 'nature' },
-  flower_block: { name: 'Flower Block', color: 0xffa0c8, cat: 'nature' },
+  snow:         { name: 'Snow',         color: 0xf5faff, cat: 'nature' },
+  ice:          { name: 'Ice',          color: 0xa8e8ff, cat: 'nature', shiny: true, transparent: true, opacity: 0.75 },
+  flower_block: { name: 'Pink Flowers', color: 0xffa0c8, cat: 'nature' },
+  flower_yellow:{ name: 'Yellow Flowers', color: 0xffe060, cat: 'nature' },
+  flower_purple:{ name: 'Purple Flowers', color: 0xc090ff, cat: 'nature' },
+  flower_blue:  { name: 'Blue Flowers', color: 0x80c0ff, cat: 'nature' },
+  flower_white: { name: 'White Flowers', color: 0xfff8ff, cat: 'nature' },
   cake:         { name: 'Cake',         color: 0xffe0f0, cat: 'food', food: 2, furniture: 'cake' },
   cookie:       { name: 'Cookie',       color: 0xd4a060, cat: 'food', food: 1 },
   strawberry:   { name: 'Strawberry',   color: 0xff4060, cat: 'food', food: 1 },
@@ -584,17 +639,27 @@ const BLOCKS = {
   icecream:     { name: 'Ice Cream',    color: 0xffe0f8, cat: 'food', food: 2 },
 };
 
-// Animals (spawn via search or button)
+// Animals (spawn via search — pick the type you want!)
 const ANIMALS = {
-  fox:   { name: 'Fox',   emoji: '🦊', color: 0xff8844 },
-  snake: { name: 'Snake', emoji: '🐍', color: 0x60c040 },
-  horse: { name: 'Horse', emoji: '🐴', color: 0xc89070 },
-  bird:  { name: 'Bird',  emoji: '🐦', color: 0x60b0ff },
-  panda: { name: 'Panda', emoji: '🐼', color: 0xf0f0f0 },
-  cat:   { name: 'Cat',   emoji: '🐱', color: 0xffb070 },
-  dog:   { name: 'Dog',   emoji: '🐶', color: 0xd4a06a },
-  fish:  { name: 'Fish',  emoji: '🐠', color: 0xff80a0 },
-  squid: { name: 'Squid', emoji: '🦑', color: 0xc070e0 },
+  fox:         { name: 'Red Fox',      emoji: '🦊', color: 0xff8844 },
+  arctic_fox:  { name: 'Arctic Fox',   emoji: '🦊', color: 0xf0f4f8, arctic: true },
+  snake:       { name: 'Snake',        emoji: '🐍', color: 0x60c040 },
+  horse:       { name: 'Horse',        emoji: '🐴', color: 0xc89070 },
+  bird:        { name: 'Blue Bird',    emoji: '🐦', color: 0x60b0ff },
+  bird_pink:   { name: 'Pink Bird',    emoji: '🐤', color: 0xff90c0 },
+  bird_yellow: { name: 'Yellow Bird',  emoji: '🐥', color: 0xffe040 },
+  bird_red:    { name: 'Red Bird',     emoji: '🦜', color: 0xff4050 },
+  bird_purple: { name: 'Purple Bird',  emoji: '🐦', color: 0xb070ff },
+  panda:       { name: 'Panda Bear',   emoji: '🐼', color: 0xf0f0f0, bear: true },
+  brown_bear:  { name: 'Brown Bear',   emoji: '🐻', color: 0x8b5a2b, bear: true },
+  polar_bear:  { name: 'Polar Bear',   emoji: '🐻‍❄️', color: 0xf5f8ff, bear: true, arctic: true },
+  teddy_bear:  { name: 'Teddy Bear',   emoji: '🧸', color: 0xd4a06a, bear: true },
+  penguin:     { name: 'Penguin',      emoji: '🐧', color: 0x222830, arctic: true },
+  seal:        { name: 'Seal',         emoji: '🦭', color: 0xa8b0b8, arctic: true },
+  cat:         { name: 'Cat',          emoji: '🐱', color: 0xffb070 },
+  dog:         { name: 'Dog',          emoji: '🐶', color: 0xd4a06a },
+  fish:        { name: 'Fish',         emoji: '🐠', color: 0xff80a0 },
+  squid:       { name: 'Squid',        emoji: '🦑', color: 0xc070e0 },
 };
 
 const BLOCK_IDS = Object.keys(BLOCKS);
@@ -749,13 +814,49 @@ function makeFurnitureMesh(id) {
     panel.position.set(0, 0.48, 0); panel.castShadow = true; g.add(panel);
     const frame = new THREE.Mesh(new THREE.BoxGeometry(0.85, 1.0, 0.06), dark);
     frame.position.set(0, 0.5, -0.02); g.add(frame);
-    const window = new THREE.Mesh(
-      new THREE.BoxGeometry(0.28, 0.28, 0.06),
-      new THREE.MeshStandardMaterial({ color: 0xa0e0ff, transparent: true, opacity: 0.65, metalness: 0.4, roughness: 0.2 })
-    );
-    window.position.set(0, 0.68, 0.04); g.add(window);
+    if (b.rainbow) {
+      const cols = [0xff6090, 0xffb040, 0xffe060, 0x60e0a0, 0x60b0ff, 0xc080ff];
+      cols.forEach((c, i) => {
+        const stripe = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.12, 0.08), new THREE.MeshStandardMaterial({ color: c }));
+        stripe.position.set(0, 0.2 + i * 0.12, 0.04); g.add(stripe);
+      });
+    } else {
+      const window = new THREE.Mesh(
+        new THREE.BoxGeometry(0.28, 0.28, 0.06),
+        new THREE.MeshStandardMaterial({ color: 0xa0e0ff, transparent: true, opacity: 0.65, metalness: 0.4, roughness: 0.2 })
+      );
+      window.position.set(0, 0.68, 0.04); g.add(window);
+    }
     const knob = new THREE.Mesh(new THREE.SphereGeometry(0.05, 8, 8), new THREE.MeshStandardMaterial({ color: 0xffd060, metalness: 0.8, roughness: 0.25 }));
     knob.position.set(0.28, 0.45, 0.08); g.add(knob);
+  } else if (b.furniture === 'fridge') {
+    const body = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.95, 0.6), mat);
+    body.position.y = 0.48; body.castShadow = true; g.add(body);
+    const handle = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.35, 0.06), dark);
+    handle.position.set(0.3, 0.55, 0.32); g.add(handle);
+    const freezer = new THREE.Mesh(new THREE.BoxGeometry(0.68, 0.02, 0.58), dark);
+    freezer.position.set(0, 0.7, 0); g.add(freezer);
+    const light = new THREE.PointLight(0xccffff, 0.25, 4, 2);
+    light.position.set(0, 0.5, 0.2); g.add(light);
+  } else if (b.furniture === 'fan') {
+    const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.08, 0.55, 8), dark);
+    pole.position.y = 0.35; g.add(pole);
+    const base = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.25, 0.08, 12), dark);
+    base.position.y = 0.05; g.add(base);
+    const hub = new THREE.Mesh(new THREE.SphereGeometry(0.1, 10, 10), mat);
+    hub.position.y = 0.7; g.add(hub);
+    const blades = new THREE.Group();
+    for (let i = 0; i < 3; i++) {
+      const blade = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.06, 0.14), mat);
+      blade.position.x = 0.2;
+      const wrap = new THREE.Group();
+      wrap.rotation.z = (i / 3) * Math.PI * 2;
+      wrap.add(blade);
+      blades.add(wrap);
+    }
+    blades.position.y = 0.7;
+    g.add(blades);
+    g.userData.spin = blades;
   } else if (b.furniture === 'vase') {
     const pot = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.18, 0.35, 12), mat);
     pot.position.y = 0.22; pot.castShadow = true; g.add(pot);
@@ -918,19 +1019,36 @@ function genWorld() {
         Math.sin(x * 0.15) * Math.cos(z * 0.12) * 1.5 +
         Math.sin(x * 0.05 + z * 0.07) * 1.2
       );
+      // Arctic snowy zone (far north / +Z)
+      const arctic = z > 16;
       for (let y = 0; y <= h; y++) {
         let id = 'dirt';
-        if (y === h) id = 'grass';
-        else if (y < h - 2) id = Math.random() > 0.85 ? 'stone' : 'dirt';
-        // pink meadow patches
-        if (y === h && Math.random() > 0.92) id = 'flower_block';
-        if (y === h && Math.random() > 0.97) id = 'pink_dream';
+        if (arctic) {
+          if (y === h) id = Math.random() > 0.15 ? 'snow' : 'ice';
+          else if (y === h - 1) id = 'ice';
+          else id = Math.random() > 0.7 ? 'stone' : 'dirt';
+        } else {
+          if (y === h) id = 'grass';
+          else if (y < h - 2) id = Math.random() > 0.85 ? 'stone' : 'dirt';
+          // flowers everywhere on grass!
+          if (y === h) {
+            const r = Math.random();
+            if (r > 0.55) {
+              const blooms = ['flower_block', 'flower_yellow', 'flower_purple', 'flower_blue', 'flower_white'];
+              id = blooms[(Math.random() * blooms.length) | 0];
+            } else if (r > 0.92) id = 'pink_dream';
+          }
+        }
         setBlock(x, y, z, id);
       }
       // water pond
       if (d > 8 && d < 12 && Math.abs(Math.atan2(z, x)) < 1.2) {
         for (let y = 1; y <= 2; y++) setBlock(x, y, z, 'water');
         setBlock(x, 0, z, 'sand_pink');
+      }
+      // little icy pond in arctic
+      if (arctic && d > 10 && Math.random() > 0.97) {
+        setBlock(x, h, z, 'ice');
       }
     }
   }
@@ -970,6 +1088,10 @@ function genWorld() {
   setBlock(0, 13, -2, 'door_pink');
   setBlock(0, 3, 5, 'door');
   setBlock(1, 4, 5, 'diamond');
+  setBlock(2, 3, 5, 'door_gold');
+  setBlock(3, 3, 5, 'door_rainbow');
+  setBlock(-2, 14, 0, 'fridge');
+  setBlock(2, 14, 1, 'fan');
 
   // Petting zoo pen with fences
   for (let i = -4; i <= 4; i++) {
@@ -987,6 +1109,18 @@ function genWorld() {
     setBlock(0, 3, z, 'rose_quartz');
     setBlock(1, 3, z, 'pearl');
     setBlock(-1, 3, z, 'pearl');
+  }
+
+  // Extra flower patches near spawn
+  for (let i = 0; i < 80; i++) {
+    const fx = ((Math.random() * 20) | 0) - 10;
+    const fz = ((Math.random() * 16) | 0) - 4;
+    let gy = 0;
+    for (let y = 12; y >= 0; y--) if (getBlock(fx, y, fz)) { gy = y; break; }
+    if (gy > 0 && getBlock(fx, gy, fz) === 'grass') {
+      const blooms = ['flower_block', 'flower_yellow', 'flower_purple', 'flower_blue', 'flower_white'];
+      setBlock(fx, gy, fz, blooms[(Math.random() * blooms.length) | 0]);
+    }
   }
 }
 
@@ -1023,12 +1157,13 @@ function makeAnimalMesh(type) {
   const white = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.6 });
   const pink = new THREE.MeshStandardMaterial({ color: 0xffa0c0, roughness: 0.6 });
 
-  if (type === 'fox') {
+  if (type === 'fox' || type === 'arctic_fox') {
     const body = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.35, 0.7), mat); body.position.y = 0.35; g.add(body);
     const head = new THREE.Mesh(new THREE.BoxGeometry(0.32, 0.28, 0.32), mat); head.position.set(0, 0.45, 0.4); g.add(head);
     const earL = new THREE.Mesh(new THREE.ConeGeometry(0.08, 0.18, 5), mat); earL.position.set(-0.1, 0.65, 0.4); g.add(earL);
     const earR = earL.clone(); earR.position.x = 0.1; g.add(earR);
-    const tail = new THREE.Mesh(new THREE.ConeGeometry(0.12, 0.45, 6), white); tail.rotation.x = Math.PI / 2; tail.position.set(0, 0.4, -0.5); g.add(tail);
+    const tailCol = type === 'arctic_fox' ? white : white;
+    const tail = new THREE.Mesh(new THREE.ConeGeometry(0.12, 0.45, 6), tailCol); tail.rotation.x = Math.PI / 2; tail.position.set(0, 0.4, -0.5); g.add(tail);
     for (const [x, z] of [[-0.12, 0.2], [0.12, 0.2], [-0.12, -0.2], [0.12, -0.2]]) {
       const leg = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.25, 0.1), mat); leg.position.set(x, 0.12, z); g.add(leg);
     }
@@ -1041,16 +1176,32 @@ function makeAnimalMesh(type) {
     for (const [x, z] of [[-0.1, 0.15], [0.1, 0.15], [-0.1, -0.15], [0.1, -0.15]]) {
       const leg = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.2, 0.08), mat); leg.position.set(x, 0.1, z); g.add(leg);
     }
-  } else if (type === 'panda') {
-    const body = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.5, 0.45), white); body.position.y = 0.4; g.add(body);
-    const head = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.38, 0.35), white); head.position.set(0, 0.7, 0.15); g.add(head);
-    const earL = new THREE.Mesh(new THREE.SphereGeometry(0.1, 8, 8), dark); earL.position.set(-0.18, 0.9, 0.1); g.add(earL);
+  } else if (def.bear || type === 'panda') {
+    const bodyMat = type === 'panda' ? white : mat;
+    const accent = type === 'panda' ? dark : (type === 'polar_bear' ? white : dark);
+    const body = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.5, 0.45), bodyMat); body.position.y = 0.4; g.add(body);
+    const head = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.38, 0.35), bodyMat); head.position.set(0, 0.7, 0.15); g.add(head);
+    const earL = new THREE.Mesh(new THREE.SphereGeometry(0.1, 8, 8), accent); earL.position.set(-0.18, 0.9, 0.1); g.add(earL);
     const earR = earL.clone(); earR.position.x = 0.18; g.add(earR);
     const eyeL = new THREE.Mesh(new THREE.SphereGeometry(0.08, 8, 8), dark); eyeL.position.set(-0.12, 0.72, 0.3); g.add(eyeL);
     const eyeR = eyeL.clone(); eyeR.position.x = 0.12; g.add(eyeR);
-    for (const [x, z] of [[-0.18, 0.12], [0.18, 0.12], [-0.18, -0.12], [0.18, -0.12]]) {
-      const leg = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.28, 0.14), dark); leg.position.set(x, 0.14, z); g.add(leg);
+    if (type === 'teddy_bear') {
+      const bow = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.12, 0.08), pink); bow.position.set(0, 0.55, 0.28); g.add(bow);
     }
+    for (const [x, z] of [[-0.18, 0.12], [0.18, 0.12], [-0.18, -0.12], [0.18, -0.12]]) {
+      const leg = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.28, 0.14), type === 'panda' ? dark : bodyMat); leg.position.set(x, 0.14, z); g.add(leg);
+    }
+  } else if (type === 'penguin') {
+    const body = new THREE.Mesh(new THREE.SphereGeometry(0.28, 10, 10), dark); body.position.y = 0.4; body.scale.set(0.85, 1.15, 0.8); g.add(body);
+    const belly = new THREE.Mesh(new THREE.SphereGeometry(0.2, 10, 10), white); belly.position.set(0, 0.38, 0.12); belly.scale.set(0.8, 1, 0.5); g.add(belly);
+    const beak = new THREE.Mesh(new THREE.ConeGeometry(0.05, 0.14, 5), new THREE.MeshStandardMaterial({ color: 0xff8800 }));
+    beak.rotation.x = Math.PI / 2; beak.position.set(0, 0.55, 0.28); g.add(beak);
+    const flipL = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.28, 0.16), dark); flipL.position.set(-0.22, 0.4, 0); g.add(flipL);
+    const flipR = flipL.clone(); flipR.position.x = 0.22; g.add(flipR);
+  } else if (type === 'seal') {
+    const body = new THREE.Mesh(new THREE.SphereGeometry(0.32, 12, 10), mat); body.position.y = 0.28; body.scale.set(1.3, 0.7, 0.85); g.add(body);
+    const head = new THREE.Mesh(new THREE.SphereGeometry(0.18, 10, 10), mat); head.position.set(0, 0.32, 0.35); g.add(head);
+    const nose = new THREE.Mesh(new THREE.SphereGeometry(0.05, 6, 6), dark); nose.position.set(0, 0.32, 0.5); g.add(nose);
   } else if (type === 'horse') {
     const body = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.45, 0.9), mat); body.position.y = 0.7; g.add(body);
     const neck = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.45, 0.22), mat); neck.position.set(0, 1.0, 0.4); neck.rotation.x = -0.4; g.add(neck);
@@ -1060,7 +1211,7 @@ function makeAnimalMesh(type) {
       const leg = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.55, 0.12), mat); leg.position.set(x, 0.28, z); g.add(leg);
     }
     const tail = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.06, 0.4, 5), dark); tail.position.set(0, 0.7, -0.55); tail.rotation.x = 0.5; g.add(tail);
-  } else if (type === 'bird') {
+  } else if (type.startsWith('bird') || type === 'bird') {
     const body = new THREE.Mesh(new THREE.SphereGeometry(0.18, 10, 10), mat); body.position.y = 0.5; g.add(body);
     const head = new THREE.Mesh(new THREE.SphereGeometry(0.12, 8, 8), mat); head.position.set(0, 0.65, 0.12); g.add(head);
     const beak = new THREE.Mesh(new THREE.ConeGeometry(0.04, 0.12, 5), new THREE.MeshStandardMaterial({ color: 0xffaa40 }));
@@ -1111,8 +1262,10 @@ function makeAnimalMesh(type) {
 }
 
 function spawnAnimal(type, x, z, opts = {}) {
+  if (!ANIMALS[type]) type = 'fox';
   const mesh = makeAnimalMesh(type);
   const aquatic = type === 'fish' || type === 'squid';
+  const flying = type.startsWith('bird');
   let gy = opts.y;
   if (gy == null) {
     gy = 0;
@@ -1120,21 +1273,20 @@ function spawnAnimal(type, x, z, opts = {}) {
       if (getBlock(Math.floor(x), y, Math.floor(z))) { gy = y + 1; break; }
     }
     if (aquatic) {
-      // prefer sitting in water near pond
       for (let y = 8; y >= 0; y--) {
         if (getBlock(Math.floor(x), y, Math.floor(z)) === 'water') { gy = y + 0.35; break; }
       }
     }
   }
-  mesh.position.set(x, gy, z);
+  mesh.position.set(x, flying ? gy + 4 + Math.random() * 6 : gy, z);
   scene.add(mesh);
   animalList.push({
     type, mesh,
-    home: new THREE.Vector3(x, gy, z),
+    home: new THREE.Vector3(x, mesh.position.y, z),
     angle: Math.random() * Math.PI * 2,
-    speed: type === 'bird' ? 3 : type === 'snake' ? 1.2 : aquatic ? 2.2 : 1.6,
+    speed: flying ? 3 : type === 'snake' ? 1.2 : aquatic ? 2.2 : 1.6,
     phase: Math.random() * 10,
-    fly: type === 'bird',
+    fly: flying,
     swim: aquatic,
   });
 }
@@ -1145,13 +1297,28 @@ spawnAnimal('cat', 5, 3);
 spawnAnimal('dog', 4, 5);
 spawnAnimal('dog', -1, 19);
 spawnAnimal('panda', 0, 20);
+spawnAnimal('brown_bear', -8, 18);
+spawnAnimal('teddy_bear', 2, 19);
 spawnAnimal('horse', 2, 21);
 spawnAnimal('bird', -3, -3);
-spawnAnimal('bird', 10, 5);
+spawnAnimal('bird_pink', 10, 5);
+spawnAnimal('bird_yellow', -5, 8);
+spawnAnimal('bird_red', 6, -6);
+spawnAnimal('bird_purple', -10, 2);
 spawnAnimal('snake', 9, -10);
 spawnAnimal('cat', -2, 19);
 spawnAnimal('fox', 3, 18);
-// Fish & squid in the pond (water is around d 8–12)
+// Arctic animals in the snowy north (+Z)
+spawnAnimal('polar_bear', -4, 22);
+spawnAnimal('polar_bear', 5, 24);
+spawnAnimal('penguin', 0, 23);
+spawnAnimal('penguin', 3, 25);
+spawnAnimal('penguin', -3, 26);
+spawnAnimal('arctic_fox', 8, 22);
+spawnAnimal('arctic_fox', -7, 24);
+spawnAnimal('seal', 2, 27);
+spawnAnimal('seal', -2, 28);
+// Fish & squid in the pond
 spawnAnimal('fish', 9, 2, { y: 1.6 });
 spawnAnimal('fish', 10, 0, { y: 1.5 });
 spawnAnimal('fish', 8, 3, { y: 1.7 });
@@ -1196,11 +1363,153 @@ function applyCameraOrientation() {
 }
 
 const HOTBAR_DEFAULT = [
-  'pink_dream', 'diamond', 'door_pink', 'vase_pink', 'bed_pink',
-  'candle_pink', 'table', 'fence', 'water'
+  'pink_dream', 'diamond', 'door_pink', 'fridge', 'fan',
+  'snow', 'flower_block', 'bed_pink', 'door_rainbow'
 ];
 let hotbar = HOTBAR_DEFAULT.slice();
 let selected = 0;
+
+// Character (saved per tablet)
+const character = {
+  name: 'Fiona',
+  style: 'girl',
+  hair: 0x4a2818,
+  outfit: 0xff6bb5,
+};
+const HAIR_COLORS = [0x4a2818, 0xffd060, 0xff90c0, 0x222222, 0xc05020, 0x8866ff];
+const OUTFIT_COLORS = [0xff6bb5, 0x70b0ff, 0x80e0a0, 0xffc060, 0xc070ff, 0xffffff];
+
+function initCharPickers() {
+  const hairEl = document.getElementById('hairPick');
+  const outfitEl = document.getElementById('outfitPick');
+  if (!hairEl || !outfitEl) return;
+  hairEl.innerHTML = '';
+  outfitEl.innerHTML = '';
+  HAIR_COLORS.forEach((c, i) => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.style.background = '#' + c.toString(16).padStart(6, '0');
+    if (c === character.hair) b.classList.add('on');
+    b.onclick = () => {
+      character.hair = c;
+      hairEl.querySelectorAll('button').forEach(x => x.classList.remove('on'));
+      b.classList.add('on');
+    };
+    hairEl.appendChild(b);
+  });
+  OUTFIT_COLORS.forEach((c) => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.style.background = '#' + c.toString(16).padStart(6, '0');
+    if (c === character.outfit) b.classList.add('on');
+    b.onclick = () => {
+      character.outfit = c;
+      outfitEl.querySelectorAll('button').forEach(x => x.classList.remove('on'));
+      b.classList.add('on');
+    };
+    outfitEl.appendChild(b);
+  });
+}
+initCharPickers();
+
+// ─── Local save (this tablet only) ───────────────────────────
+const SAVE_KEY = 'mooneye_save_v2';
+let saveTimer = 0;
+
+function serializeWorld() {
+  const out = [];
+  for (const [k, id] of world.entries()) out.push([k, id]);
+  return out;
+}
+
+function loadWorldData(entries) {
+  if (!entries || !entries.length) return;
+  // clear existing
+  for (const k of [...world.keys()]) {
+    const { x, y, z } = parseKey(k);
+    setBlock(x, y, z, null);
+  }
+  for (const [k, id] of entries) {
+    const { x, y, z } = parseKey(k);
+    if (BLOCKS[id]) setBlock(x, y, z, id);
+  }
+}
+
+function saveGame(quiet = true) {
+  try {
+    const data = {
+      v: 2,
+      savedAt: Date.now(),
+      character: { ...character },
+      player: {
+        x: player.pos.x, y: player.pos.y, z: player.pos.z,
+        yaw: player.yaw, pitch: player.pitch,
+        flying: player.flying,
+        hearts: player.hearts, hunger: player.hunger,
+      },
+      hotbar: hotbar.slice(),
+      selected,
+      night,
+      world: serializeWorld(),
+    };
+    localStorage.setItem(SAVE_KEY, JSON.stringify(data));
+    const pill = document.getElementById('savePill');
+    if (pill && !quiet) pill.textContent = '💾 Saved!';
+    if (pill && quiet) pill.textContent = '💾 Saved';
+    return true;
+  } catch (e) {
+    console.warn('save failed', e);
+    return false;
+  }
+}
+
+function loadGame() {
+  try {
+    const raw = localStorage.getItem(SAVE_KEY);
+    if (!raw) return false;
+    const data = JSON.parse(raw);
+    if (!data || data.v < 2) return false;
+    if (data.character) Object.assign(character, data.character);
+    if (data.player) {
+      player.pos.set(data.player.x, data.player.y, data.player.z);
+      player.yaw = data.player.yaw || 0;
+      player.pitch = data.player.pitch || 0;
+      player.flying = !!data.player.flying;
+      player.hearts = data.player.hearts ?? 5;
+      player.hunger = data.player.hunger ?? 5;
+      player.vel.set(0, 0, 0);
+    }
+    if (Array.isArray(data.hotbar)) hotbar = data.hotbar.slice(0, 9);
+    if (typeof data.selected === 'number') selected = data.selected;
+    if (data.night) setDayNight(true);
+    if (data.world) loadWorldData(data.world);
+    applyCharacterUI();
+    return true;
+  } catch (e) {
+    console.warn('load failed', e);
+    return false;
+  }
+}
+
+function hasSave() {
+  try { return !!localStorage.getItem(SAVE_KEY); } catch { return false; }
+}
+
+function applyCharacterUI() {
+  const nameEl = document.getElementById('playerNameTag');
+  if (nameEl) nameEl.textContent = character.name || 'Builder';
+  const cn = document.getElementById('charName');
+  const cs = document.getElementById('charStyle');
+  if (cn) cn.value = character.name || '';
+  if (cs) cs.value = character.style || 'girl';
+}
+
+function readCharacterFromForm() {
+  const cn = document.getElementById('charName');
+  const cs = document.getElementById('charStyle');
+  if (cn) character.name = (cn.value || 'Builder').slice(0, 16);
+  if (cs) character.style = cs.value || 'girl';
+}
 
 // ─── Input ───────────────────────────────────────────────────
 const keys = Object.create(null);
@@ -1231,23 +1540,42 @@ scene.add(starField);
 const isTouchDevice = matchMedia('(pointer: coarse)').matches || 'ontouchstart' in window;
 if (isTouchDevice) document.body.classList.add('touch');
 
+// Prefill continue button if this tablet has a save
+if (hasSave()) {
+  try {
+    const data = JSON.parse(localStorage.getItem(SAVE_KEY));
+    if (data?.character) Object.assign(character, data.character);
+  } catch {}
+  applyCharacterUI();
+  initCharPickers();
+  const btn = document.getElementById('startBtn');
+  if (btn) btn.textContent = '✨ Continue on this tablet ✨';
+}
+
 document.getElementById('startBtn').onclick = () => {
+  readCharacterFromForm();
+  applyCharacterUI();
   document.getElementById('overlay').classList.add('hidden');
   document.getElementById('hud').classList.add('show');
-  // Reset upright view when entering the world
-  player.yaw = 0;
-  player.pitch = 0;
-  player.pos.set(0.5, 6, 0.5);
-  player.vel.set(0, 0, 0);
+
+  const loaded = loadGame();
+  if (!loaded) {
+    player.yaw = 0;
+    player.pitch = 0;
+    player.pos.set(0.5, 6, 0.5);
+    player.vel.set(0, 0, 0);
+  }
   applyCameraOrientation();
   camera.position.set(player.pos.x, player.pos.y + 1.45, player.pos.z);
   if (!isTouchDevice) canvas.requestPointerLock();
   buildHotbar();
   startMusic();
   updateFlyUI();
-  toast(isTouchDevice
-    ? 'Welcome! 📱 Use MOVE + LOOK pads · PLACE / BREAK buttons · 🦋 Fly!'
-    : 'Welcome! 🌙 Press F or 🦋 Fly to fly in the sky!');
+  updateStatus();
+  saveGame(true);
+  toast(loaded
+    ? `Welcome back, ${character.name}! 💾 Loaded this tablet’s world`
+    : `Hi ${character.name}! 🌙 Your world will save on this tablet`);
 };
 
 document.addEventListener('pointerlockchange', () => {
@@ -1420,6 +1748,10 @@ function placeBlock() {
   if (id === 'grass') toast('Green grass growing! 🌱');
   if (id === 'cherry_leaves') toast('Cherry blossoms! 🌸');
   if (id === 'bamboo') toast('Bamboo forest vibes 🎋');
+  if (id === 'snow' || id === 'ice') toast('Arctic chill! ❄️');
+  if (id === 'fridge') toast('Fridge placed! 🧊');
+  if (id === 'fan') toast('Cute fan spinning! 💨');
+  saveGame(true);
 }
 
 function breakBlock() {
@@ -1431,6 +1763,7 @@ function breakBlock() {
   }
   setBlock(hit.x, hit.y, hit.z, null);
   playBreak();
+  saveGame(true);
 }
 
 // ─── Physics ─────────────────────────────────────────────────
@@ -2051,6 +2384,12 @@ function frame() {
       if (player.hunger > 0) player.hunger = Math.max(0, player.hunger - 0.5);
       updateStatus();
     }
+    // Autosave on this tablet every ~5s
+    saveTimer += dt;
+    if (saveTimer > 5) {
+      saveTimer = 0;
+      saveGame(true);
+    }
   } else if (!document.getElementById('hud').classList.contains('show')) {
     // title orbit — keep camera upright (never roll upside down)
     const t = performance.now() * 0.0002;
@@ -2070,13 +2409,16 @@ function frame() {
     if (p.position.y < 0) p.position.y = 18 + Math.random() * 10;
   }
 
-  // flicker candle flames
+  // flicker candle flames + spin fans
   const ft = performance.now() * 0.008;
   meshes.forEach((mesh) => {
     if (mesh.userData && mesh.userData.flame) {
       const f = mesh.userData.flame;
       f.scale.y = 1.1 + Math.sin(ft + f.id) * 0.15;
       f.scale.x = 0.65 + Math.sin(ft * 1.3) * 0.08;
+    }
+    if (mesh.userData && mesh.userData.spin) {
+      mesh.userData.spin.rotation.z += dt * 8;
     }
   });
 
@@ -2092,11 +2434,35 @@ window.addEventListener('resize', () => {
 
 // Initial hotbar paint when DOM ready
 buildHotbar();
+applyCharacterUI();
 
-// Service worker for installable PWA (best-effort)
+// Service worker for offline tablets
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('./sw.js').catch(() => {});
+  navigator.serviceWorker.register('./sw.js').then((reg) => {
+    setTimeout(() => {
+      const badge = document.getElementById('offlineBadge');
+      if (badge && (navigator.serviceWorker.controller || reg.active)) {
+        badge.style.display = 'block';
+      }
+    }, 1200);
+  }).catch(() => {});
 }
+window.addEventListener('offline', () => {
+  const badge = document.getElementById('offlineBadge');
+  if (badge) {
+    badge.style.display = 'block';
+    badge.textContent = '📴 Offline — playing from this tablet';
+    badge.style.color = '#c07020';
+  }
+});
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden' && document.getElementById('hud').classList.contains('show')) {
+    saveGame(true);
+  }
+});
+window.addEventListener('pagehide', () => {
+  if (document.getElementById('hud').classList.contains('show')) saveGame(true);
+});
   </script>
 </body>
 </html>
