@@ -2,7 +2,18 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#ff6bb5" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Moon Eye" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="description" content="Moon Eye — sparkly girly building world with animals, pink blocks, and sky houses!" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" type="image/png" href="favicon.png" />
+  <link rel="apple-touch-icon" href="icon-180.png" />
+  <link rel="apple-touch-icon" sizes="192x192" href="icon-192.png" />
+  <link rel="apple-touch-icon" sizes="512x512" href="icon-512.png" />
   <title>Moon Eye — Girly Building World</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;800;900&display=swap');
@@ -295,6 +306,56 @@
       background: rgba(40,12,35,0.75); color: #ffd0e8; border: 2px solid rgba(255,160,210,0.45);
       border-radius: 14px; padding: 10px 12px; font-size: 0.8rem;
     }
+
+    /* Tablet / touch controls */
+    #touchPad {
+      display: none; position: absolute; inset: 0; pointer-events: none; z-index: 15;
+    }
+    body.touch #touchPad { display: block; }
+    body.touch .crosshair { opacity: 0.35; }
+    body.touch #controlSign {
+      width: min(200px, 40vw); font-size: 0.9em; top: auto; bottom: 100px; max-height: 42vh; overflow-y: auto;
+    }
+    .touch-zone {
+      position: absolute; pointer-events: auto; touch-action: none;
+      border-radius: 20px; background: rgba(40,12,35,0.35);
+      border: 2px solid rgba(255,180,220,0.35);
+    }
+    #lookZone {
+      right: 12px; bottom: 100px; width: min(42vw, 200px); height: min(32vh, 180px);
+    }
+    #moveZone {
+      left: 12px; bottom: 100px; width: min(42vw, 200px); height: min(32vh, 180px);
+    }
+    .stick-label {
+      position: absolute; top: 6px; left: 0; right: 0; text-align: center;
+      font-size: 0.7rem; font-weight: 800; color: #ffd0e8; opacity: 0.9;
+    }
+    .stick-base {
+      position: absolute; left: 50%; top: 55%; width: 90px; height: 90px;
+      margin: -45px 0 0 -45px; border-radius: 50%;
+      background: rgba(255,160,210,0.18); border: 2px solid rgba(255,200,230,0.4);
+    }
+    .stick-knob {
+      position: absolute; left: 50%; top: 55%; width: 42px; height: 42px;
+      margin: -21px 0 0 -21px; border-radius: 50%;
+      background: linear-gradient(145deg, #ff8ec8, #d070ff);
+      border: 2px solid rgba(255,255,255,0.5);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+    #touchActions {
+      position: absolute; right: 12px; bottom: 12px; display: flex; gap: 10px; pointer-events: auto;
+    }
+    .tact {
+      width: 64px; height: 64px; border-radius: 18px; border: 2px solid rgba(255,255,255,0.45);
+      background: linear-gradient(145deg, #ff8ec8, #d070ff); color: #fff;
+      font-weight: 900; font-size: 0.72rem; font-family: inherit;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.3); pointer-events: auto;
+    }
+    .tact.alt { background: linear-gradient(145deg, #c9a0ff, #8ec8ff); }
+    .install-hint {
+      font-size: 0.82rem; color: #8a4070; margin-top: 0.6rem; line-height: 1.4;
+    }
   </style>
 </head>
 <body>
@@ -315,6 +376,10 @@
         • <strong>Search</strong> shows everything · controls stay on screen while you play
       </div>
       <button class="pretty" id="startBtn" type="button">✨ Enter Moon Eye ✨</button>
+      <p class="install-hint" id="installHint">
+        📱 <b>Tablet tip:</b> In Safari/Chrome, use <b>Share → Add to Home Screen</b>
+        to get the Moon Eye icon on your tablet!
+      </p>
     </div>
   </div>
 
@@ -375,6 +440,25 @@
     <div id="hotbar" class="clickable"></div>
     <div class="help-fab clickable">
       <button type="button" id="helpBtn">❓ Tips</button>
+    </div>
+
+    <div id="touchPad">
+      <div class="touch-zone" id="moveZone">
+        <div class="stick-label">MOVE</div>
+        <div class="stick-base"></div>
+        <div class="stick-knob" id="moveKnob"></div>
+      </div>
+      <div class="touch-zone" id="lookZone">
+        <div class="stick-label">LOOK</div>
+        <div class="stick-base"></div>
+        <div class="stick-knob" id="lookKnob"></div>
+      </div>
+      <div id="touchActions">
+        <button type="button" class="tact alt" id="touchJump">JUMP<br>↑</button>
+        <button type="button" class="tact alt" id="touchDown">DOWN<br>↓</button>
+        <button type="button" class="tact" id="touchPlace">PLACE<br>＋</button>
+        <button type="button" class="tact alt" id="touchBreak">BREAK<br>✕</button>
+      </div>
     </div>
   </div>
 
@@ -448,8 +532,15 @@ const BLOCKS = {
   bamboo:       { name: 'Bamboo',       color: 0x70c050, cat: 'nature', thin: true },
   water:        { name: 'Water',        color: 0x60c0ff, cat: 'nature', transparent: true, opacity: 0.55, shiny: true },
   fence:        { name: 'Cute Fence',   color: 0xe8b898, cat: 'build', fence: true },
+  door:         { name: 'Pretty Door',  color: 0xe8a070, cat: 'build', furniture: 'door' },
+  door_pink:    { name: 'Pink Door',    color: 0xff90c0, cat: 'build', furniture: 'door' },
+  door_purple:  { name: 'Purple Door',  color: 0xb080e0, cat: 'build', furniture: 'door' },
   chair:        { name: 'Chair',        color: 0xff9ed0, cat: 'furniture', furniture: 'chair' },
   table:        { name: 'Table',        color: 0xffc0e0, cat: 'furniture', furniture: 'table' },
+  vase_pink:    { name: 'Pink Vase',    color: 0xff80b0, cat: 'furniture', furniture: 'vase', flower: 0xff60a0 },
+  vase_blue:    { name: 'Blue Vase',    color: 0x80b0ff, cat: 'furniture', furniture: 'vase', flower: 0xffe060 },
+  vase_purple:  { name: 'Purple Vase',  color: 0xc090ff, cat: 'furniture', furniture: 'vase', flower: 0xff90d0 },
+  vase_white:   { name: 'Pearl Vase',   color: 0xfff5fb, cat: 'furniture', furniture: 'vase', flower: 0xffb0d0 },
   // Colorful beds (she asked for beds in all different colors!)
   bed_pink:     { name: 'Pink Bed',     color: 0xff80c0, cat: 'furniture', furniture: 'bed', blanket: 0xff70b0, pillow: 0xfff0f8 },
   bed_hot_pink: { name: 'Hot Pink Bed', color: 0xff4fa0, cat: 'furniture', furniture: 'bed', blanket: 0xff2080, pillow: 0xffe0f0 },
@@ -479,6 +570,7 @@ const BLOCKS = {
   cloud:        { name: 'Cloud Block',  color: 0xffffff, cat: 'blocks', transparent: true, opacity: 0.85 },
   star_block:   { name: 'Star Block',   color: 0xfff0a0, cat: 'blocks', shiny: true, emit: 0.4 },
   heart_block:  { name: 'Heart Block',  color: 0xff6090, cat: 'blocks', shiny: true },
+  diamond:      { name: 'Diamond Block', color: 0x7aefe8, cat: 'blocks', shiny: true, emit: 0.45 },
   rainbow:      { name: 'Rainbow',      color: 0xff88cc, cat: 'blocks', shiny: true },
   sand_pink:    { name: 'Pink Sand',    color: 0xffd8c8, cat: 'nature' },
   flower_block: { name: 'Flower Block', color: 0xffa0c8, cat: 'nature' },
@@ -500,6 +592,9 @@ const ANIMALS = {
   bird:  { name: 'Bird',  emoji: '🐦', color: 0x60b0ff },
   panda: { name: 'Panda', emoji: '🐼', color: 0xf0f0f0 },
   cat:   { name: 'Cat',   emoji: '🐱', color: 0xffb070 },
+  dog:   { name: 'Dog',   emoji: '🐶', color: 0xd4a06a },
+  fish:  { name: 'Fish',  emoji: '🐠', color: 0xff80a0 },
+  squid: { name: 'Squid', emoji: '🦑', color: 0xc070e0 },
 };
 
 const BLOCK_IDS = Object.keys(BLOCKS);
@@ -649,6 +744,40 @@ function makeFurnitureMesh(id) {
     icing.position.y = 0.45; g.add(icing);
     const cherry = new THREE.Mesh(new THREE.SphereGeometry(0.08, 8, 8), new THREE.MeshStandardMaterial({ color: 0xff2040 }));
     cherry.position.y = 0.55; g.add(cherry);
+  } else if (b.furniture === 'door') {
+    const panel = new THREE.Mesh(new THREE.BoxGeometry(0.75, 0.95, 0.1), mat);
+    panel.position.set(0, 0.48, 0); panel.castShadow = true; g.add(panel);
+    const frame = new THREE.Mesh(new THREE.BoxGeometry(0.85, 1.0, 0.06), dark);
+    frame.position.set(0, 0.5, -0.02); g.add(frame);
+    const window = new THREE.Mesh(
+      new THREE.BoxGeometry(0.28, 0.28, 0.06),
+      new THREE.MeshStandardMaterial({ color: 0xa0e0ff, transparent: true, opacity: 0.65, metalness: 0.4, roughness: 0.2 })
+    );
+    window.position.set(0, 0.68, 0.04); g.add(window);
+    const knob = new THREE.Mesh(new THREE.SphereGeometry(0.05, 8, 8), new THREE.MeshStandardMaterial({ color: 0xffd060, metalness: 0.8, roughness: 0.25 }));
+    knob.position.set(0.28, 0.45, 0.08); g.add(knob);
+  } else if (b.furniture === 'vase') {
+    const pot = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.18, 0.35, 12), mat);
+    pot.position.y = 0.22; pot.castShadow = true; g.add(pot);
+    const rim = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.14, 0.06, 12), mat);
+    rim.position.y = 0.42; g.add(rim);
+    const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.025, 0.28, 6), new THREE.MeshStandardMaterial({ color: 0x50a040 }));
+    stem.position.y = 0.55; g.add(stem);
+    const flowerCol = b.flower ?? 0xff80c0;
+    const bloom = new THREE.Mesh(
+      new THREE.SphereGeometry(0.1, 10, 10),
+      new THREE.MeshStandardMaterial({ color: flowerCol, emissive: flowerCol, emissiveIntensity: 0.25 })
+    );
+    bloom.position.y = 0.72; g.add(bloom);
+    for (let i = 0; i < 5; i++) {
+      const petal = new THREE.Mesh(
+        new THREE.SphereGeometry(0.06, 6, 6),
+        new THREE.MeshStandardMaterial({ color: flowerCol, roughness: 0.6 })
+      );
+      const a = (i / 5) * Math.PI * 2;
+      petal.position.set(Math.cos(a) * 0.1, 0.7, Math.sin(a) * 0.1);
+      g.add(petal);
+    }
   } else if (b.fence) {
     const postL = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.9, 0.12), mat);
     postL.position.set(-0.4, 0.45, 0); g.add(postL);
@@ -669,6 +798,23 @@ function createBlockMesh(id) {
   mesh.castShadow = true;
   mesh.receiveShadow = true;
   if (b.thin) mesh.position.y = 0; // still centered in cell later
+  if (id === 'diamond') {
+    const g = new THREE.Group();
+    const core = new THREE.Mesh(boxGeo, getMat(id));
+    core.castShadow = true; g.add(core);
+    const gem = new THREE.Mesh(
+      new THREE.OctahedronGeometry(0.28, 0),
+      new THREE.MeshStandardMaterial({
+        color: 0xb8fff8, metalness: 0.9, roughness: 0.12,
+        emissive: 0x40e0d0, emissiveIntensity: 0.55
+      })
+    );
+    gem.position.y = 0.1; g.add(gem);
+    const spark = new THREE.PointLight(0x80fff0, 0.55, 6, 2);
+    spark.position.y = 0.2; g.add(spark);
+    g.userData.isGroup = true;
+    return g;
+  }
   // grass top tint overlay
   if (id === 'grass') {
     const g = new THREE.Group();
@@ -816,9 +962,14 @@ function genWorld() {
   setBlock(0, 14, 0, 'star_block');
   setBlock(1, 14, 0, 'chair');
   setBlock(-1, 14, 0, 'table');
+  setBlock(-1, 15, 0, 'vase_pink'); // vase on the table!
   setBlock(0, 14, 1, 'bed_pink');
   setBlock(1, 14, 1, 'candle_pink');
   setBlock(-1, 14, 1, 'fairy_lamp');
+  setBlock(2, 14, 0, 'diamond');
+  setBlock(0, 13, -2, 'door_pink');
+  setBlock(0, 3, 5, 'door');
+  setBlock(1, 4, 5, 'diamond');
 
   // Petting zoo pen with fences
   for (let i = -4; i <= 4; i++) {
@@ -924,18 +1075,56 @@ function makeAnimalMesh(type) {
     }
     const head = new THREE.Mesh(new THREE.SphereGeometry(0.14, 8, 8), mat); head.position.set(0, 0.14, 0.15); g.add(head);
     const tongue = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.02, 0.12), pink); tongue.position.set(0, 0.14, 0.28); g.add(tongue);
+  } else if (type === 'dog') {
+    const body = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.35, 0.65), mat); body.position.y = 0.4; g.add(body);
+    const head = new THREE.Mesh(new THREE.BoxGeometry(0.32, 0.3, 0.32), mat); head.position.set(0, 0.55, 0.38); g.add(head);
+    const snout = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.12, 0.16), new THREE.MeshStandardMaterial({ color: 0xc09060 }));
+    snout.position.set(0, 0.48, 0.55); g.add(snout);
+    const earL = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.18, 0.06), mat); earL.position.set(-0.14, 0.72, 0.35); g.add(earL);
+    const earR = earL.clone(); earR.position.x = 0.14; g.add(earR);
+    const tail = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.06, 0.35, 5), mat);
+    tail.position.set(0, 0.5, -0.4); tail.rotation.x = 0.8; g.add(tail);
+    for (const [x, z] of [[-0.12, 0.2], [0.12, 0.2], [-0.12, -0.2], [0.12, -0.2]]) {
+      const leg = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.28, 0.1), mat); leg.position.set(x, 0.14, z); g.add(leg);
+    }
+  } else if (type === 'fish') {
+    const body = new THREE.Mesh(new THREE.SphereGeometry(0.16, 10, 10), mat); body.position.y = 0.2; body.scale.set(1.4, 0.8, 0.7); g.add(body);
+    const tail = new THREE.Mesh(new THREE.ConeGeometry(0.1, 0.2, 6), mat); tail.rotation.z = Math.PI / 2; tail.position.set(-0.22, 0.2, 0); g.add(tail);
+    const fin = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.08, 0.02), pink); fin.position.set(0, 0.32, 0); g.add(fin);
+    const eye = new THREE.Mesh(new THREE.SphereGeometry(0.03, 6, 6), dark); eye.position.set(0.12, 0.24, 0.08); g.add(eye);
+  } else if (type === 'squid') {
+    const head = new THREE.Mesh(new THREE.SphereGeometry(0.22, 12, 12), mat); head.position.y = 0.35; head.scale.set(0.9, 1.15, 0.9); g.add(head);
+    for (let i = 0; i < 6; i++) {
+      const a = (i / 6) * Math.PI * 2;
+      const tent = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.05, 0.4, 5), mat);
+      tent.position.set(Math.cos(a) * 0.1, 0.08, Math.sin(a) * 0.1);
+      tent.rotation.x = Math.cos(a) * 0.4;
+      tent.rotation.z = Math.sin(a) * 0.4;
+      g.add(tent);
+    }
+    const eyeL = new THREE.Mesh(new THREE.SphereGeometry(0.04, 6, 6), dark); eyeL.position.set(-0.08, 0.4, 0.16); g.add(eyeL);
+    const eyeR = eyeL.clone(); eyeR.position.x = 0.08; g.add(eyeR);
   }
 
   g.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
   return g;
 }
 
-function spawnAnimal(type, x, z) {
+function spawnAnimal(type, x, z, opts = {}) {
   const mesh = makeAnimalMesh(type);
-  // ground height
-  let gy = 0;
-  for (let y = 30; y >= 0; y--) {
-    if (getBlock(Math.floor(x), y, Math.floor(z))) { gy = y + 1; break; }
+  const aquatic = type === 'fish' || type === 'squid';
+  let gy = opts.y;
+  if (gy == null) {
+    gy = 0;
+    for (let y = 30; y >= 0; y--) {
+      if (getBlock(Math.floor(x), y, Math.floor(z))) { gy = y + 1; break; }
+    }
+    if (aquatic) {
+      // prefer sitting in water near pond
+      for (let y = 8; y >= 0; y--) {
+        if (getBlock(Math.floor(x), y, Math.floor(z)) === 'water') { gy = y + 0.35; break; }
+      }
+    }
   }
   mesh.position.set(x, gy, z);
   scene.add(mesh);
@@ -943,15 +1132,18 @@ function spawnAnimal(type, x, z) {
     type, mesh,
     home: new THREE.Vector3(x, gy, z),
     angle: Math.random() * Math.PI * 2,
-    speed: type === 'bird' ? 3 : type === 'snake' ? 1.2 : 1.6,
+    speed: type === 'bird' ? 3 : type === 'snake' ? 1.2 : aquatic ? 2.2 : 1.6,
     phase: Math.random() * 10,
     fly: type === 'bird',
+    swim: aquatic,
   });
 }
 
 // Starter animals
 spawnAnimal('fox', -6, 4);
 spawnAnimal('cat', 5, 3);
+spawnAnimal('dog', 4, 5);
+spawnAnimal('dog', -1, 19);
 spawnAnimal('panda', 0, 20);
 spawnAnimal('horse', 2, 21);
 spawnAnimal('bird', -3, -3);
@@ -959,6 +1151,12 @@ spawnAnimal('bird', 10, 5);
 spawnAnimal('snake', 9, -10);
 spawnAnimal('cat', -2, 19);
 spawnAnimal('fox', 3, 18);
+// Fish & squid in the pond (water is around d 8–12)
+spawnAnimal('fish', 9, 2, { y: 1.6 });
+spawnAnimal('fish', 10, 0, { y: 1.5 });
+spawnAnimal('fish', 8, 3, { y: 1.7 });
+spawnAnimal('squid', 10, 1, { y: 1.4 });
+spawnAnimal('squid', 9, -1, { y: 1.55 });
 
 // ─── Player ──────────────────────────────────────────────────
 const player = {
@@ -998,8 +1196,8 @@ function applyCameraOrientation() {
 }
 
 const HOTBAR_DEFAULT = [
-  'pink_dream', 'bed_pink', 'bed_purple', 'candle_pink', 'fairy_lamp',
-  'cherry_leaves', 'bamboo', 'fence', 'chair'
+  'pink_dream', 'diamond', 'door_pink', 'vase_pink', 'bed_pink',
+  'candle_pink', 'table', 'fence', 'water'
 ];
 let hotbar = HOTBAR_DEFAULT.slice();
 let selected = 0;
@@ -1030,6 +1228,9 @@ scene.add(starField);
   starField.visible = false;
 }
 
+const isTouchDevice = matchMedia('(pointer: coarse)').matches || 'ontouchstart' in window;
+if (isTouchDevice) document.body.classList.add('touch');
+
 document.getElementById('startBtn').onclick = () => {
   document.getElementById('overlay').classList.add('hidden');
   document.getElementById('hud').classList.add('show');
@@ -1040,11 +1241,13 @@ document.getElementById('startBtn').onclick = () => {
   player.vel.set(0, 0, 0);
   applyCameraOrientation();
   camera.position.set(player.pos.x, player.pos.y + 1.45, player.pos.z);
-  canvas.requestPointerLock();
+  if (!isTouchDevice) canvas.requestPointerLock();
   buildHotbar();
   startMusic();
   updateFlyUI();
-  toast('Welcome! 🌙 Press F or 🦋 Fly to fly in the sky!');
+  toast(isTouchDevice
+    ? 'Welcome! 📱 Use MOVE + LOOK pads · PLACE / BREAK buttons · 🦋 Fly!'
+    : 'Welcome! 🌙 Press F or 🦋 Fly to fly in the sky!');
 };
 
 document.addEventListener('pointerlockchange', () => {
@@ -1054,8 +1257,73 @@ document.addEventListener('pointerlockchange', () => {
 canvas.addEventListener('click', () => {
   if (document.getElementById('searchPanel').classList.contains('open')) return;
   if (!document.getElementById('overlay').classList.contains('hidden')) return;
-  if (!pointerLocked) canvas.requestPointerLock();
+  if (!isTouchDevice && !pointerLocked) canvas.requestPointerLock();
 });
+
+// ─── Touch controls (tablets) ────────────────────────────────
+const touchMove = { x: 0, z: 0 };
+const touchLook = { x: 0, y: 0 };
+function bindStick(zoneId, knobId, onMove, onEnd) {
+  const zone = document.getElementById(zoneId);
+  const knob = document.getElementById(knobId);
+  if (!zone || !knob) return;
+  let active = null;
+  function center() {
+    const r = zone.getBoundingClientRect();
+    return { x: r.left + r.width / 2, y: r.top + r.height * 0.55, max: Math.min(r.width, r.height) * 0.28 };
+  }
+  function handle(clientX, clientY) {
+    const c = center();
+    let dx = clientX - c.x;
+    let dy = clientY - c.y;
+    const len = Math.hypot(dx, dy) || 1;
+    if (len > c.max) { dx = (dx / len) * c.max; dy = (dy / len) * c.max; }
+    knob.style.transform = `translate(${dx}px, ${dy}px)`;
+    onMove(dx / c.max, dy / c.max);
+  }
+  zone.addEventListener('pointerdown', e => {
+    active = e.pointerId;
+    zone.setPointerCapture(e.pointerId);
+    handle(e.clientX, e.clientY);
+    e.preventDefault();
+  });
+  zone.addEventListener('pointermove', e => {
+    if (active !== e.pointerId) return;
+    handle(e.clientX, e.clientY);
+    e.preventDefault();
+  });
+  function end(e) {
+    if (active !== e.pointerId) return;
+    active = null;
+    knob.style.transform = 'translate(0,0)';
+    onEnd();
+  }
+  zone.addEventListener('pointerup', end);
+  zone.addEventListener('pointercancel', end);
+}
+bindStick('moveZone', 'moveKnob', (x, y) => {
+  touchMove.x = x;
+  touchMove.z = y;
+}, () => { touchMove.x = 0; touchMove.z = 0; });
+bindStick('lookZone', 'lookKnob', (x, y) => {
+  touchLook.x = x;
+  touchLook.y = y;
+}, () => { touchLook.x = 0; touchLook.y = 0; });
+
+function bindHold(btnId, code) {
+  const el = document.getElementById(btnId);
+  if (!el) return;
+  const down = e => { keys[code] = true; e.preventDefault(); };
+  const up = e => { keys[code] = false; e.preventDefault(); };
+  el.addEventListener('pointerdown', down);
+  el.addEventListener('pointerup', up);
+  el.addEventListener('pointerleave', up);
+  el.addEventListener('pointercancel', up);
+}
+bindHold('touchJump', 'Space');
+bindHold('touchDown', 'KeyC');
+document.getElementById('touchPlace')?.addEventListener('pointerdown', e => { placeBlock(); e.preventDefault(); });
+document.getElementById('touchBreak')?.addEventListener('pointerdown', e => { breakBlock(); e.preventDefault(); });
 
 window.addEventListener('keydown', e => {
   keys[e.code] = true;
@@ -1178,6 +1446,14 @@ function solidAt(x, y, z) {
 }
 
 function updatePlayer(dt) {
+  // Touch look (tablets)
+  if (isTouchDevice && (touchLook.x || touchLook.y)) {
+    player.yaw -= touchLook.x * 1.8 * dt;
+    player.pitch -= touchLook.y * 1.4 * dt;
+    const maxPitch = Math.PI / 2 - 0.08;
+    player.pitch = Math.max(-maxPitch, Math.min(maxPitch, player.pitch));
+  }
+
   const speed = keys['ShiftLeft'] || keys['ShiftRight'] ? 9 : 5.5;
   const forward = lookForwardXZ();
   const right = lookRightXZ();
@@ -1186,6 +1462,11 @@ function updatePlayer(dt) {
   if (keys['KeyS'] || keys['ArrowDown']) wish.sub(forward);
   if (keys['KeyA'] || keys['ArrowLeft']) wish.sub(right);
   if (keys['KeyD'] || keys['ArrowRight']) wish.add(right);
+  // Touch move stick (forward is -Y on stick / up on pad)
+  if (isTouchDevice && (touchMove.x || touchMove.z)) {
+    wish.add(forward.clone().multiplyScalar(-touchMove.z));
+    wish.add(right.clone().multiplyScalar(touchMove.x));
+  }
   if (wish.lengthSq() > 0) wish.normalize().multiplyScalar(speed);
 
   if (player.flying) {
@@ -1284,13 +1565,18 @@ function updateAnimals(dt) {
         a.mesh.userData.wings[0].rotation.z = flap;
         a.mesh.userData.wings[1].rotation.z = -flap;
       }
+    } else if (a.swim) {
+      // swim around in water
+      a.mesh.position.y = a.home.y + Math.sin(t * 2.5 + a.phase) * 0.25;
+      a.mesh.rotation.z = Math.sin(t * 3 + a.phase) * 0.2;
     } else {
       // stick to ground
       const gx = Math.floor(a.mesh.position.x);
       const gz = Math.floor(a.mesh.position.z);
       let gy = 0;
       for (let y = 25; y >= 0; y--) {
-        if (getBlock(gx, y, gz) && BLOCKS[getBlock(gx, y, gz)] && !BLOCKS[getBlock(gx, y, gz)].transparent) {
+        const id = getBlock(gx, y, gz);
+        if (id && BLOCKS[id] && !BLOCKS[id].transparent) {
           gy = y + 1; break;
         }
       }
@@ -1806,6 +2092,11 @@ window.addEventListener('resize', () => {
 
 // Initial hotbar paint when DOM ready
 buildHotbar();
+
+// Service worker for installable PWA (best-effort)
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js').catch(() => {});
+}
   </script>
 </body>
 </html>
