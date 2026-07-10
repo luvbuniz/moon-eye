@@ -20,6 +20,14 @@ Or open `index.html` in Chrome / Edge.
 npx --yes serve .
 ```
 
+### 📱 Add to a tablet (app icon)
+
+1. Open the live link on the tablet  
+2. **iPad (Safari):** Share → **Add to Home Screen**  
+3. **Android tablet (Chrome):** Menu ⋮ → **Add to Home screen** / **Install app**  
+
+You’ll get the **Moon Eye** moon icon on the home screen!
+
 ---
 
 ## About
@@ -35,7 +43,8 @@ It was designed from a kid’s wish list: pink everything, animals, a Search but
 | **Lights** | Pink/white/lavender/gold/rose candles, fairy lamp, moon lamp, heart lamp, lantern, string lights, glow block, night light |
 | **Nature** | Grass, water, cherry blossom trees, bamboo forest, flowers |
 | **Furniture** | Chairs, tables, beds, fences |
-| **Animals** | Fox, snake, horse, bird, panda, cat |
+| **Animals** | Fox, snake, horse, bird, panda, cat, **dog**, **fish**, **squid** |
+| **Fiona favorites** | **Doors**, **vases** for tables, **diamond blocks**, fish & squid in the pond |
 | **Food** | Cake, cookie, strawberry, cupcake, candy, sandwich, berry juice, ice cream |
 | **Day / Night** | Toggle button — night has stars & moon; candles glow beautifully |
 | **Search** | One button lists every block, light, food, and animal |
