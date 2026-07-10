@@ -260,8 +260,8 @@
         • <strong>W A S D</strong> move · <strong>Space</strong> jump · <strong>mouse</strong> look<br>
         • <strong>Left click</strong> place block · <strong>Right click</strong> break<br>
         • <strong>1–9</strong> hotbar · <strong>E</strong> eat selected food<br>
-        • <strong>Search</strong> button shows <em>everything</em> in the game<br>
-        • Near water? Place more water &amp; grass to grow your world!
+        • <strong>Search</strong> shows everything · <strong>Day/Night</strong> toggle<br>
+        • Colorful beds, candles &amp; lights · build houses in the sky!
       </div>
       <button class="pretty" id="startBtn" type="button">✨ Enter Moon Eye ✨</button>
     </div>
@@ -295,7 +295,7 @@
     <div class="side-tools">
       <button class="tool-btn clickable" id="searchBtn" type="button">🔍 Search</button>
       <button class="tool-btn secondary clickable" id="spawnAnimalBtn" type="button">🦊 Spawn Pet</button>
-      <button class="tool-btn secondary clickable" id="dayBtn" type="button">🌸 Day / Night</button>
+      <button class="tool-btn secondary clickable" id="dayBtn" type="button">☀️ Daytime</button>
     </div>
 
     <div class="hint-bar" id="hintBar">Click the game to look around · Left place · Right break · Search shows all items</div>
@@ -377,8 +377,31 @@ const BLOCKS = {
   fence:        { name: 'Cute Fence',   color: 0xe8b898, cat: 'build', fence: true },
   chair:        { name: 'Chair',        color: 0xff9ed0, cat: 'furniture', furniture: 'chair' },
   table:        { name: 'Table',        color: 0xffc0e0, cat: 'furniture', furniture: 'table' },
-  bed:          { name: 'Pink Bed',     color: 0xff80c0, cat: 'furniture', furniture: 'bed' },
-  lamp:         { name: 'Fairy Lamp',   color: 0xffe8a0, cat: 'furniture', furniture: 'lamp', emit: 0.6 },
+  // Colorful beds (she asked for beds in all different colors!)
+  bed_pink:     { name: 'Pink Bed',     color: 0xff80c0, cat: 'furniture', furniture: 'bed', blanket: 0xff70b0, pillow: 0xfff0f8 },
+  bed_hot_pink: { name: 'Hot Pink Bed', color: 0xff4fa0, cat: 'furniture', furniture: 'bed', blanket: 0xff2080, pillow: 0xffe0f0 },
+  bed_purple:   { name: 'Purple Bed',   color: 0xb070ff, cat: 'furniture', furniture: 'bed', blanket: 0x9050e0, pillow: 0xf0e0ff },
+  bed_lavender: { name: 'Lavender Bed', color: 0xd0b0ff, cat: 'furniture', furniture: 'bed', blanket: 0xc090ff, pillow: 0xf8f0ff },
+  bed_blue:     { name: 'Sky Blue Bed', color: 0x80c8ff, cat: 'furniture', furniture: 'bed', blanket: 0x60b0ff, pillow: 0xf0f8ff },
+  bed_mint:     { name: 'Mint Bed',     color: 0x80e8c0, cat: 'furniture', furniture: 'bed', blanket: 0x50d0a0, pillow: 0xf0fff8 },
+  bed_yellow:   { name: 'Sunshine Bed', color: 0xffe080, cat: 'furniture', furniture: 'bed', blanket: 0xffd040, pillow: 0xfffaf0 },
+  bed_peach:    { name: 'Peach Bed',    color: 0xffc0a0, cat: 'furniture', furniture: 'bed', blanket: 0xffa070, pillow: 0xfff5f0 },
+  bed_white:    { name: 'Pearl Bed',    color: 0xfff5fb, cat: 'furniture', furniture: 'bed', blanket: 0xffe0f0, pillow: 0xffffff },
+  bed_rainbow:  { name: 'Rainbow Bed',  color: 0xff88cc, cat: 'furniture', furniture: 'bed', blanket: 0x88e0ff, pillow: 0xfff0a0, rainbow: true },
+  bed_heart:    { name: 'Heart Bed',    color: 0xff6090, cat: 'furniture', furniture: 'bed', blanket: 0xff3060, pillow: 0xffc0d0 },
+  // Candles & lights
+  candle_pink:  { name: 'Pink Candle',  color: 0xffb0d0, cat: 'lights', furniture: 'candle', flame: 0xffaa66, emit: 0.7 },
+  candle_white: { name: 'White Candle', color: 0xfff8f0, cat: 'lights', furniture: 'candle', flame: 0xffcc88, emit: 0.65 },
+  candle_lavender:{ name: 'Lavender Candle', color: 0xd0b0ff, cat: 'lights', furniture: 'candle', flame: 0xcc88ff, emit: 0.7 },
+  candle_gold:  { name: 'Gold Candle',  color: 0xffd070, cat: 'lights', furniture: 'candle', flame: 0xffee88, emit: 0.75 },
+  candle_rose:  { name: 'Rose Candle',  color: 0xff90a8, cat: 'lights', furniture: 'candle', flame: 0xff8866, emit: 0.7 },
+  fairy_lamp:   { name: 'Fairy Lamp',   color: 0xffe8a0, cat: 'lights', furniture: 'lamp', emit: 0.6, lightColor: 0xffe8b0 },
+  moon_lamp:    { name: 'Moon Lamp',    color: 0xe0e8ff, cat: 'lights', furniture: 'lamp', emit: 0.7, lightColor: 0xc0d0ff },
+  heart_lamp:   { name: 'Heart Lamp',   color: 0xff80b0, cat: 'lights', furniture: 'lamp', emit: 0.65, lightColor: 0xff90c0 },
+  lantern:      { name: 'Cute Lantern', color: 0xffc060, cat: 'lights', furniture: 'lantern', emit: 0.8, lightColor: 0xffcc66 },
+  string_lights:{ name: 'String Lights', color: 0xff90c8, cat: 'lights', furniture: 'string_lights', emit: 0.5, lightColor: 0xffb0e0 },
+  glow_block:   { name: 'Glow Block',   color: 0xffe0a0, cat: 'lights', shiny: true, emit: 0.85 },
+  night_light:  { name: 'Night Light',  color: 0xc0a0ff, cat: 'lights', furniture: 'night_light', emit: 0.6, lightColor: 0xd0b0ff },
   glass_pink:   { name: 'Pink Glass',   color: 0xffc0e0, cat: 'blocks', transparent: true, opacity: 0.4, shiny: true },
   cloud:        { name: 'Cloud Block',  color: 0xffffff, cat: 'blocks', transparent: true, opacity: 0.85 },
   star_block:   { name: 'Star Block',   color: 0xfff0a0, cat: 'blocks', shiny: true, emit: 0.4 },
@@ -457,19 +480,95 @@ function makeFurnitureMesh(id) {
       leg.position.set(x, 0.25, z); g.add(leg);
     }
   } else if (b.furniture === 'bed') {
-    const base = new THREE.Mesh(new THREE.BoxGeometry(0.95, 0.25, 0.95), mat);
-    base.position.y = 0.2; g.add(base);
-    const pillow = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.12, 0.3), new THREE.MeshStandardMaterial({ color: 0xfff0f8 }));
-    pillow.position.set(0, 0.4, -0.25); g.add(pillow);
-    const blanket = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.08, 0.55), new THREE.MeshStandardMaterial({ color: 0xff70b0, roughness: 0.6 }));
-    blanket.position.set(0, 0.36, 0.15); g.add(blanket);
+    const frame = new THREE.Mesh(new THREE.BoxGeometry(0.95, 0.18, 0.95), dark);
+    frame.position.y = 0.12; g.add(frame);
+    const mattress = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.14, 0.9), mat);
+    mattress.position.y = 0.28; mattress.castShadow = true; g.add(mattress);
+    const pillowCol = b.pillow ?? 0xfff0f8;
+    const blanketCol = b.blanket ?? b.color;
+    const pillow = new THREE.Mesh(
+      new THREE.BoxGeometry(0.5, 0.12, 0.3),
+      new THREE.MeshStandardMaterial({ color: pillowCol, roughness: 0.75 })
+    );
+    pillow.position.set(0, 0.42, -0.28); g.add(pillow);
+    if (b.rainbow) {
+      const cols = [0xff6090, 0xffb040, 0xffe060, 0x60e0a0, 0x60b0ff, 0xc080ff];
+      cols.forEach((c, i) => {
+        const stripe = new THREE.Mesh(
+          new THREE.BoxGeometry(0.9, 0.07, 0.09),
+          new THREE.MeshStandardMaterial({ color: c, roughness: 0.55 })
+        );
+        stripe.position.set(0, 0.38, -0.05 + i * 0.1); g.add(stripe);
+      });
+    } else {
+      const blanket = new THREE.Mesh(
+        new THREE.BoxGeometry(0.9, 0.08, 0.55),
+        new THREE.MeshStandardMaterial({ color: blanketCol, roughness: 0.55 })
+      );
+      blanket.position.set(0, 0.38, 0.15); g.add(blanket);
+    }
+    // headboard
+    const head = new THREE.Mesh(new THREE.BoxGeometry(0.95, 0.45, 0.08), mat);
+    head.position.set(0, 0.45, -0.44); g.add(head);
   } else if (b.furniture === 'lamp') {
     const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.08, 0.55, 8), dark);
     pole.position.y = 0.3; g.add(pole);
     const shade = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.35, 0.3, 12), mat);
     shade.position.y = 0.7; g.add(shade);
-    const light = new THREE.PointLight(0xffe8b0, 0.9, 8, 2);
+    const lc = b.lightColor ?? 0xffe8b0;
+    const light = new THREE.PointLight(lc, 1.1, 10, 2);
     light.position.y = 0.7; g.add(light);
+  } else if (b.furniture === 'candle') {
+    const stick = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.1, 0.45, 10), mat);
+    stick.position.y = 0.28; g.add(stick);
+    const wick = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.015, 0.08, 5), dark);
+    wick.position.y = 0.54; g.add(wick);
+    const flameCol = b.flame ?? 0xffaa66;
+    const flame = new THREE.Mesh(
+      new THREE.SphereGeometry(0.07, 8, 8),
+      new THREE.MeshStandardMaterial({ color: flameCol, emissive: flameCol, emissiveIntensity: 1.2, transparent: true, opacity: 0.95 })
+    );
+    flame.position.y = 0.62; flame.scale.set(0.7, 1.2, 0.7); g.add(flame);
+    const light = new THREE.PointLight(flameCol, 0.85, 7, 2);
+    light.position.y = 0.65; g.add(light);
+    g.userData.flame = flame;
+  } else if (b.furniture === 'lantern') {
+    const body = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.45, 0.4), mat);
+    body.position.y = 0.4; g.add(body);
+    const top = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.08, 0.45), dark);
+    top.position.y = 0.65; g.add(top);
+    const handle = new THREE.Mesh(new THREE.TorusGeometry(0.12, 0.025, 6, 12, Math.PI), dark);
+    handle.position.y = 0.78; handle.rotation.x = Math.PI; g.add(handle);
+    const glow = new THREE.Mesh(
+      new THREE.SphereGeometry(0.12, 8, 8),
+      new THREE.MeshStandardMaterial({ color: 0xffee88, emissive: 0xffcc44, emissiveIntensity: 1 })
+    );
+    glow.position.y = 0.4; g.add(glow);
+    const light = new THREE.PointLight(b.lightColor ?? 0xffcc66, 1.2, 12, 2);
+    light.position.y = 0.4; g.add(light);
+  } else if (b.furniture === 'string_lights') {
+    const wire = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.03, 0.03), dark);
+    wire.position.y = 0.75; g.add(wire);
+    const cols = [0xff80c0, 0xffe060, 0x80e0ff, 0xc090ff, 0xffa060];
+    cols.forEach((c, i) => {
+      const bulb = new THREE.Mesh(
+        new THREE.SphereGeometry(0.07, 8, 8),
+        new THREE.MeshStandardMaterial({ color: c, emissive: c, emissiveIntensity: 0.9 })
+      );
+      bulb.position.set(-0.35 + i * 0.18, 0.65, 0); g.add(bulb);
+    });
+    const light = new THREE.PointLight(b.lightColor ?? 0xffb0e0, 0.7, 8, 2);
+    light.position.y = 0.65; g.add(light);
+  } else if (b.furniture === 'night_light') {
+    const base = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.25, 0.12, 12), dark);
+    base.position.y = 0.08; g.add(base);
+    const dome = new THREE.Mesh(
+      new THREE.SphereGeometry(0.28, 12, 12, 0, Math.PI * 2, 0, Math.PI * 0.55),
+      new THREE.MeshStandardMaterial({ color: b.color, emissive: b.color, emissiveIntensity: 0.5, transparent: true, opacity: 0.85 })
+    );
+    dome.position.y = 0.2; g.add(dome);
+    const light = new THREE.PointLight(b.lightColor ?? 0xd0b0ff, 0.9, 9, 2);
+    light.position.y = 0.35; g.add(light);
   } else if (b.furniture === 'cake') {
     const cake = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.4, 0.35, 16), mat);
     cake.position.y = 0.25; g.add(cake);
@@ -644,6 +743,9 @@ function genWorld() {
   setBlock(0, 14, 0, 'star_block');
   setBlock(1, 14, 0, 'chair');
   setBlock(-1, 14, 0, 'table');
+  setBlock(0, 14, 1, 'bed_pink');
+  setBlock(1, 14, 1, 'candle_pink');
+  setBlock(-1, 14, 1, 'fairy_lamp');
 
   // Petting zoo pen with fences
   for (let i = -4; i <= 4; i++) {
@@ -798,8 +900,8 @@ const player = {
 };
 
 const HOTBAR_DEFAULT = [
-  'pink_dream', 'hot_pink', 'lavender', 'cherry_leaves', 'bamboo',
-  'grass', 'water', 'fence', 'chair'
+  'pink_dream', 'bed_pink', 'bed_purple', 'candle_pink', 'fairy_lamp',
+  'cherry_leaves', 'bamboo', 'fence', 'chair'
 ];
 let hotbar = HOTBAR_DEFAULT.slice();
 let selected = 0;
@@ -808,6 +910,27 @@ let selected = 0;
 const keys = Object.create(null);
 let pointerLocked = false;
 let night = false;
+const starField = new THREE.Group();
+scene.add(starField);
+{
+  const starGeo = new THREE.SphereGeometry(0.08, 4, 4);
+  const starMat = new THREE.MeshBasicMaterial({ color: 0xfff8ff });
+  for (let i = 0; i < 120; i++) {
+    const s = new THREE.Mesh(starGeo, starMat);
+    const th = Math.random() * Math.PI * 2;
+    const ph = Math.random() * 0.9;
+    const r = 55 + Math.random() * 30;
+    s.position.set(Math.cos(th) * Math.cos(ph) * r, 15 + Math.sin(ph) * r * 0.7, Math.sin(th) * Math.cos(ph) * r);
+    starField.add(s);
+  }
+  const moon = new THREE.Mesh(
+    new THREE.SphereGeometry(3.5, 16, 16),
+    new THREE.MeshStandardMaterial({ color: 0xfff5e0, emissive: 0xffe8c0, emissiveIntensity: 0.6, roughness: 0.8 })
+  );
+  moon.position.set(-40, 45, -30);
+  starField.add(moon);
+  starField.visible = false;
+}
 
 document.getElementById('startBtn').onclick = () => {
   document.getElementById('overlay').classList.add('hidden');
@@ -1139,6 +1262,7 @@ const TABS = [
   { id: 'blocks', label: 'Pink Blocks' },
   { id: 'nature', label: 'Nature' },
   { id: 'furniture', label: 'Furniture' },
+  { id: 'lights', label: 'Candles & Lights' },
   { id: 'build', label: 'Build' },
   { id: 'food', label: 'Food' },
   { id: 'animals', label: 'Animals' },
@@ -1242,18 +1366,21 @@ document.getElementById('spawnAnimalBtn').onclick = () => {
   toast(`${ANIMALS[type].emoji} ${ANIMALS[type].name} friend!`);
 };
 
-document.getElementById('dayBtn').onclick = () => {
-  night = !night;
+function setDayNight(isNight) {
+  night = isNight;
+  const btn = document.getElementById('dayBtn');
   if (night) {
-    scene.background = new THREE.Color(0x1a1030);
+    scene.background = new THREE.Color(0x120820);
     scene.fog.color.set(0x1a1030);
-    scene.fog.density = 0.018;
-    sun.intensity = 0.15;
-    hemi.intensity = 0.25;
-    amb.intensity = 0.15;
-    // star particles already none — add moon glow
-    pinkFill.intensity = 0.4;
-    toast('Nighttime sparkles 🌙✨');
+    scene.fog.density = 0.02;
+    sun.intensity = 0.08;
+    hemi.intensity = 0.18;
+    amb.intensity = 0.12;
+    pinkFill.intensity = 0.35;
+    pinkFill.color.set(0x8866cc);
+    starField.visible = true;
+    if (btn) btn.textContent = '🌙 Nighttime';
+    toast('Nighttime! Light candles & lamps 🕯️🌙✨');
   } else {
     scene.background = new THREE.Color(0xffc8e8);
     scene.fog.color.set(0xffd0ec);
@@ -1262,9 +1389,13 @@ document.getElementById('dayBtn').onclick = () => {
     hemi.intensity = 0.85;
     amb.intensity = 0.22;
     pinkFill.intensity = 0.25;
+    pinkFill.color.set(0xff88cc);
+    starField.visible = false;
+    if (btn) btn.textContent = '☀️ Daytime';
     toast('Sunny pink day 🌸☀️');
   }
-};
+}
+document.getElementById('dayBtn').onclick = () => setDayNight(!night);
 
 document.getElementById('helpBtn').onclick = () => {
   toast('W/A/S/D move · Space jump · F fly · Left place · Right break · E eat · Tab search');
@@ -1359,6 +1490,16 @@ function frame() {
     p.rotation.z += dt;
     if (p.position.y < 0) p.position.y = 18 + Math.random() * 10;
   }
+
+  // flicker candle flames
+  const ft = performance.now() * 0.008;
+  meshes.forEach((mesh) => {
+    if (mesh.userData && mesh.userData.flame) {
+      const f = mesh.userData.flame;
+      f.scale.y = 1.1 + Math.sin(ft + f.id) * 0.15;
+      f.scale.x = 0.65 + Math.sin(ft * 1.3) * 0.08;
+    }
+  });
 
   renderer.render(scene, camera);
 }
