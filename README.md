@@ -36,16 +36,45 @@ Kids do not share saves across tablets.
 
 ## Controls
 
+### 📱 Tablet (touch)
+
+| Touch | Action |
+|-------|--------|
+| Touch **left side** & drag | Walk — a joystick appears right under your finger |
+| Drag **right side** | Look around |
+| **Tap** a spot | Place a block right there |
+| **Hold** a block (~0.7s) | Break it (keep holding to break more) |
+| ➕ PLACE / ✕ BREAK buttons | Place / break at the center crosshair |
+| ⬆️ JUMP | Jump (hold to fly up in fly mode) |
+| ⬇️ DOWN | Fly down (shows while flying) |
+| 🦋 Fly / 🔍 Search / 👀 Straight | Top-right buttons |
+
+### ⌨️ Keyboard (computer)
+
 | Input | Action |
 |-------|--------|
 | WASD | Move |
-| Mouse / look pad | Look |
+| Mouse | Look |
 | Space / C | Fly up / down (fly mode) |
 | F | Toggle fly |
 | Left click | Place |
 | Right click | Break |
 | Tab / Search | Everything catalog |
 | E | Eat food |
+
+---
+
+## 🎵 Music
+
+The game plays `music.mp3` (calm Japanese-style track), looping, and caches it
+for offline play. To change the song, replace `music.mp3` with any track you
+have the rights to use — good sources for openly-licensed calm music:
+
+- [freepd.com](https://freepd.com) — public domain (CC0), no attribution needed
+- [incompetech.com](https://incompetech.com) — Kevin MacLeod, CC-BY (credit him in this README)
+
+If `music.mp3` is ever missing, the game falls back to a built-in koto
+synthesizer (real plucked-string synthesis, hirajōshi scale) — no files needed.
 
 ---
 
