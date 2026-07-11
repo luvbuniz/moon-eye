@@ -307,80 +307,74 @@
       border-radius: 14px; padding: 10px 12px; font-size: 0.8rem;
     }
 
-    /* Tablet / touch controls — big circles, no keyboard needed */
+    /* Tablet / touch controls — move & look with your finger */
+    body.touch {
+      -webkit-user-select: none; user-select: none;
+      -webkit-touch-callout: none; overscroll-behavior: none;
+    }
     #touchPad {
-      display: none; position: absolute; inset: 0; pointer-events: none; z-index: 15;
+      display: none; position: absolute; inset: 0; pointer-events: none; z-index: 10;
     }
     body.touch #touchPad { display: block; }
-    body.touch .crosshair { opacity: 0.25; }
+    body.touch .crosshair { opacity: 0.55; }
     body.touch #controlSign { display: none !important; } /* hide keyboard keys on tablet */
     body.touch .help-fab { display: none; }
-    body.touch #hotbar { bottom: 12px; transform: translateX(-50%) scale(0.92); }
+    /* Keep every real button ABOVE the touch layer so taps reach them */
+    body.touch .topbar, body.touch .side-tools,
+    body.touch #hotbar, body.touch .hint-bar { z-index: 30; }
+    body.touch #hotbar { bottom: 10px; padding: 8px 10px; gap: 5px; }
+    body.touch #hotbar .slot { width: 56px; height: 56px; }
     body.touch .hint-bar {
-      top: auto; bottom: auto; left: 50%; top: 58px; max-width: 90vw;
-      font-size: 0.72rem; white-space: normal;
+      bottom: auto; top: 56px; font-size: 0.72rem; text-align: center;
+      max-width: min(60vw, 520px); white-space: normal;
     }
-    body.touch .side-tools { top: 58px; right: 8px; gap: 8px; }
-    body.touch .tool-btn { padding: 14px 16px; font-size: 0.95rem; min-width: 88px; }
-    #lookDragLayer {
-      display: none; position: absolute; inset: 0; pointer-events: auto; touch-action: none; z-index: 1;
+    body.touch .side-tools { top: 56px; right: 10px; gap: 8px; }
+    body.touch .tool-btn { padding: 14px 16px; font-size: 0.95rem; min-width: 92px; }
+    .touch-only { display: none; }
+    body.touch .touch-only { display: inline-block; }
+    /* Full-screen finger layer: left side walks, right side looks */
+    #touchLayer {
+      position: absolute; inset: 0; pointer-events: auto;
+      touch-action: none; z-index: 1;
     }
-    body.touch #lookDragLayer { display: block; }
-    .touch-zone {
-      position: absolute; pointer-events: auto; touch-action: none; z-index: 16;
-      border-radius: 50%;
-      background: rgba(40,12,35,0.42);
-      border: 3px solid rgba(255,180,220,0.5);
-      box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+    /* Floating joystick that appears right under the finger */
+    #joyBase {
+      display: none; position: absolute; width: 148px; height: 148px;
+      margin: -74px 0 0 -74px; border-radius: 50%; pointer-events: none; z-index: 12;
+      background: radial-gradient(circle, rgba(255,160,210,0.18) 52%, rgba(255,160,210,0.05) 72%);
+      border: 3px solid rgba(255,190,225,0.65);
+      box-shadow: 0 6px 24px rgba(0,0,0,0.25), inset 0 0 26px rgba(255,140,200,0.22);
     }
-    #moveZone {
-      left: 18px; bottom: 90px;
-      width: min(38vw, 150px); height: min(38vw, 150px);
-    }
-    #lookZone {
-      right: 18px; bottom: 90px;
-      width: min(38vw, 150px); height: min(38vw, 150px);
-    }
-    .stick-label {
-      position: absolute; top: 10px; left: 0; right: 0; text-align: center;
-      font-size: 0.78rem; font-weight: 900; color: #ffe0f0; letter-spacing: 0.06em;
-      text-shadow: 0 1px 4px #000;
-    }
-    .stick-base {
-      position: absolute; left: 50%; top: 54%; width: 72%; height: 72%;
-      margin: 0; transform: translate(-50%, -50%); border-radius: 50%;
-      background: rgba(255,160,210,0.15); border: 2px solid rgba(255,200,230,0.35);
-    }
-    .stick-knob {
-      position: absolute; left: 50%; top: 54%; width: 38%; height: 38%;
-      margin: 0; transform: translate(-50%, -50%); border-radius: 50%;
+    #joyKnob {
+      position: absolute; left: 50%; top: 50%; width: 60px; height: 60px;
+      margin: -30px 0 0 -30px; border-radius: 50%;
       background: linear-gradient(145deg, #ff8ec8, #d070ff);
-      border: 3px solid rgba(255,255,255,0.55);
+      border: 3px solid rgba(255,255,255,0.65);
       box-shadow: 0 4px 14px rgba(0,0,0,0.35);
       will-change: transform;
     }
     #touchActions {
-      position: absolute; right: 12px; bottom: 12px;
-      display: flex; flex-wrap: wrap; gap: 10px; max-width: 50vw;
-      pointer-events: auto; z-index: 16; justify-content: flex-end;
+      position: absolute; right: 12px; bottom: 96px;
+      display: grid; grid-template-columns: auto auto; gap: 12px;
+      align-items: end; justify-items: end;
+      pointer-events: none; z-index: 20;
     }
-    #touchActionsLeft {
-      position: absolute; left: 12px; bottom: 12px;
-      display: none; flex-wrap: wrap; gap: 10px; max-width: 48vw;
-      pointer-events: auto; z-index: 16;
-    }
-    body.touch #touchActionsLeft { display: flex; }
     .tact {
-      width: 70px; height: 70px; border-radius: 50%; border: 3px solid rgba(255,255,255,0.5);
+      width: 76px; height: 76px; border-radius: 50%; border: 3px solid rgba(255,255,255,0.55);
       background: linear-gradient(145deg, #ff8ec8, #d070ff); color: #fff;
-      font-weight: 900; font-size: 0.7rem; font-family: inherit; line-height: 1.15;
+      font-weight: 900; font-size: 0.72rem; font-family: inherit; line-height: 1.15;
       box-shadow: 0 6px 16px rgba(0,0,0,0.35); pointer-events: auto;
-      -webkit-tap-highlight-color: transparent; user-select: none;
+      -webkit-tap-highlight-color: transparent; user-select: none; touch-action: none;
     }
-    .tact:active { transform: scale(0.94); }
-    .tact.alt { background: linear-gradient(145deg, #c9a0ff, #8ec8ff); }
-    .tact.fly { background: linear-gradient(145deg, #7ad7ff, #c070ff); }
-    .tact.wide { width: 78px; border-radius: 20px; }
+    .tact:active { transform: scale(0.92); filter: brightness(1.12); }
+    .tact.place { background: linear-gradient(145deg, #6fe0a8, #2fae7c); }
+    .tact.break { background: linear-gradient(145deg, #ff9080, #e05070); }
+    .tact.jump {
+      background: linear-gradient(145deg, #8ec8ff, #c9a0ff);
+      width: 90px; height: 90px; font-size: 0.82rem;
+    }
+    #touchDown { visibility: hidden; pointer-events: none; }
+    body.flying #touchDown { visibility: visible; pointer-events: auto; }
     .install-hint {
       font-size: 0.82rem; color: #8a4070; margin-top: 0.6rem; line-height: 1.4;
     }
@@ -504,36 +498,23 @@
       <button class="tool-btn secondary clickable" id="spawnAnimalBtn" type="button">🦊 Spawn Pet</button>
       <button class="tool-btn secondary clickable" id="dayBtn" type="button">☀️ Daytime</button>
       <button class="tool-btn secondary clickable" id="musicBtn" type="button">🎐 Music On</button>
+      <button class="tool-btn secondary clickable touch-only" id="centerBtn" type="button">👀 Straight</button>
     </div>
 
-    <div class="hint-bar" id="hintBar">Left circle = move · Right circle = look · Or drag finger on the screen</div>
+    <div class="hint-bar" id="hintBar">👣 Drag left side = walk · 👀 drag right side = look · tap = place · hold = break</div>
     <div id="hotbar" class="clickable"></div>
     <div class="help-fab clickable desktop-only">
       <button type="button" id="helpBtn">❓ Tips</button>
     </div>
 
     <div id="touchPad">
-      <div id="lookDragLayer"></div>
-      <div class="touch-zone" id="moveZone">
-        <div class="stick-label">MOVE</div>
-        <div class="stick-base"></div>
-        <div class="stick-knob" id="moveKnob"></div>
-      </div>
-      <div class="touch-zone" id="lookZone">
-        <div class="stick-label">LOOK</div>
-        <div class="stick-base"></div>
-        <div class="stick-knob" id="lookKnob"></div>
-      </div>
-      <div id="touchActionsLeft">
-        <button type="button" class="tact fly" id="touchFly">🦋<br>FLY</button>
-        <button type="button" class="tact alt" id="touchCenter">👀<br>CENTER</button>
-        <button type="button" class="tact alt" id="touchSearch">🔍<br>SEARCH</button>
-      </div>
+      <div id="touchLayer"></div>
+      <div id="joyBase"><div id="joyKnob"></div></div>
       <div id="touchActions">
-        <button type="button" class="tact alt" id="touchJump">⬆️<br>UP</button>
-        <button type="button" class="tact alt" id="touchDown">⬇️<br>DOWN</button>
-        <button type="button" class="tact" id="touchPlace">➕<br>PLACE</button>
-        <button type="button" class="tact alt" id="touchBreak">✕<br>BREAK</button>
+        <button type="button" class="tact break" id="touchBreak">✕<br>BREAK</button>
+        <button type="button" class="tact" id="touchDown">⬇️<br>DOWN</button>
+        <button type="button" class="tact place" id="touchPlace">➕<br>PLACE</button>
+        <button type="button" class="tact jump" id="touchJump">⬆️<br>JUMP</button>
       </div>
     </div>
   </div>
@@ -583,6 +564,88 @@ pinkFill.position.set(-30, 20, -20);
 scene.add(pinkFill);
 const amb = new THREE.AmbientLight(0xffb0d8, 0.22);
 scene.add(amb);
+
+// ─── Pretty sky: gradient dome, glowing sun, drifting clouds ─
+function gradientTex(stops) {
+  const cv = document.createElement('canvas');
+  cv.width = 2; cv.height = 512;
+  const ctx = cv.getContext('2d');
+  const g = ctx.createLinearGradient(0, 0, 0, 512);
+  for (const [o, c] of stops) g.addColorStop(o, c);
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, 2, 512);
+  const t = new THREE.CanvasTexture(cv);
+  t.colorSpace = THREE.SRGBColorSpace;
+  return t;
+}
+const skyDayTex = gradientTex([
+  [0, '#7db8ff'], [0.42, '#b9d6ff'], [0.6, '#ffd8ee'], [0.78, '#ffc2e4'], [1, '#ffb2dc'],
+]);
+const skyNightTex = gradientTex([
+  [0, '#040210'], [0.45, '#150a30'], [0.7, '#2c164a'], [1, '#3c1e56'],
+]);
+const skyMat = new THREE.MeshBasicMaterial({
+  map: skyDayTex, side: THREE.BackSide, fog: false, depthWrite: false,
+});
+const skyDome = new THREE.Mesh(new THREE.SphereGeometry(165, 32, 20), skyMat);
+skyDome.renderOrder = -10;
+scene.add(skyDome);
+
+function glowTex(inner, mid) {
+  const cv = document.createElement('canvas');
+  cv.width = cv.height = 128;
+  const ctx = cv.getContext('2d');
+  const g = ctx.createRadialGradient(64, 64, 4, 64, 64, 64);
+  g.addColorStop(0, inner);
+  g.addColorStop(0.35, mid);
+  g.addColorStop(1, 'rgba(255,255,255,0)');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, 128, 128);
+  const t = new THREE.CanvasTexture(cv);
+  t.colorSpace = THREE.SRGBColorSpace;
+  return t;
+}
+const sunSprite = new THREE.Sprite(new THREE.SpriteMaterial({
+  map: glowTex('rgba(255,250,235,1)', 'rgba(255,222,170,0.55)'),
+  transparent: true, depthWrite: false, fog: false,
+}));
+sunSprite.scale.set(48, 48, 1);
+sunSprite.position.set(72, 126, 36); // same direction as the sun light
+scene.add(sunSprite);
+
+const clouds = [];
+{
+  const cloudMaps = [];
+  for (let v = 0; v < 3; v++) {
+    const cv = document.createElement('canvas');
+    cv.width = 256; cv.height = 128;
+    const ctx = cv.getContext('2d');
+    for (let i = 0; i < 14; i++) {
+      const x = 45 + Math.random() * 166;
+      const y = 48 + Math.random() * 36;
+      const r = 18 + Math.random() * 28;
+      const g = ctx.createRadialGradient(x, y, 2, x, y, r);
+      g.addColorStop(0, 'rgba(255,255,255,0.85)');
+      g.addColorStop(1, 'rgba(255,255,255,0)');
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, 256, 128);
+    }
+    const t = new THREE.CanvasTexture(cv);
+    t.colorSpace = THREE.SRGBColorSpace;
+    cloudMaps.push(t);
+  }
+  for (let i = 0; i < 9; i++) {
+    const s = new THREE.Sprite(new THREE.SpriteMaterial({
+      map: cloudMaps[i % 3], transparent: true, opacity: 0.75, depthWrite: false, fog: false,
+    }));
+    const sc = 22 + Math.random() * 26;
+    s.scale.set(sc, sc * 0.42, 1);
+    s.position.set((Math.random() - 0.5) * 240, 34 + Math.random() * 26, (Math.random() - 0.5) * 240);
+    s.userData.sp = 0.4 + Math.random() * 0.8;
+    scene.add(s);
+    clouds.push(s);
+  }
+}
 
 // ─── Block definitions (girly + detailed) ────────────────────
 const BLOCKS = {
@@ -704,12 +767,79 @@ const world = new Map();   // "x,y,z" -> blockId
 function key(x, y, z) { return `${x},${y},${z}`; }
 function parseKey(k) { const [x, y, z] = k.split(',').map(Number); return { x, y, z }; }
 
+// ─── Procedural block textures — grain, speckle & bevel ──────
+const texCache = {};
+function shadeCss(color, dl) {
+  const h = {};
+  color.getHSL(h);
+  return '#' + new THREE.Color().setHSL(h.h, h.s, THREE.MathUtils.clamp(h.l + dl, 0, 1)).getHexString();
+}
+function makeBlockTexture(id) {
+  if (texCache[id]) return texCache[id];
+  const b = BLOCKS[id];
+  const S = 64;
+  const cv = document.createElement('canvas');
+  cv.width = cv.height = S;
+  const ctx = cv.getContext('2d');
+  const col = new THREE.Color(b.color);
+  ctx.fillStyle = '#' + col.getHexString();
+  ctx.fillRect(0, 0, S, S);
+
+  if (/wood|plank|log|bamboo|fence|door/.test(id)) {
+    // vertical wood grain
+    for (let i = 0; i < 9; i++) {
+      ctx.fillStyle = shadeCss(col, i % 2 ? -0.05 : 0.045);
+      ctx.fillRect((i / 9) * S + Math.random() * 3, 0, 3 + Math.random() * 3, S);
+    }
+    ctx.fillStyle = shadeCss(col, -0.1);
+    for (let i = 0; i < 5; i++) {
+      ctx.fillRect((Math.random() * S) | 0, (Math.random() * S) | 0, 2, 5 + Math.random() * 9);
+    }
+  } else {
+    // soft speckle (grass, dirt, snow, stone, everything cute)
+    for (let i = 0; i < 180; i++) {
+      ctx.fillStyle = shadeCss(col, (Math.random() - 0.5) * 0.14);
+      ctx.fillRect((Math.random() * S) | 0, (Math.random() * S) | 0, Math.random() < 0.8 ? 2 : 3, Math.random() < 0.8 ? 2 : 3);
+    }
+  }
+  if (b.shiny || b.emit) {
+    // little starry sparkles
+    ctx.fillStyle = 'rgba(255,255,255,0.85)';
+    for (let i = 0; i < 7; i++) {
+      const px = (Math.random() * (S - 4) + 2) | 0;
+      const py = (Math.random() * (S - 4) + 2) | 0;
+      ctx.fillRect(px - 2, py, 5, 1);
+      ctx.fillRect(px, py - 2, 1, 5);
+    }
+  }
+  // bevel: light top / dark bottom + edge line (fake ambient occlusion)
+  const g = ctx.createLinearGradient(0, 0, 0, S);
+  g.addColorStop(0, 'rgba(255,255,255,0.20)');
+  g.addColorStop(0.14, 'rgba(255,255,255,0)');
+  g.addColorStop(0.86, 'rgba(0,0,0,0)');
+  g.addColorStop(1, 'rgba(0,0,0,0.22)');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, S, S);
+  ctx.strokeStyle = 'rgba(0,0,0,0.16)';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(1, 1, S - 2, S - 2);
+
+  const tex = new THREE.CanvasTexture(cv);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.magFilter = THREE.NearestFilter;
+  texCache[id] = tex;
+  return tex;
+}
+
 function getMat(id) {
   if (materials[id]) return materials[id];
   const b = BLOCKS[id];
+  // fully transparent-ish blocks (water, glass, clouds) stay smooth
+  const textured = !b.transparent || id === 'ice';
   const mat = new THREE.MeshStandardMaterial({
-    color: b.color,
-    metalness: b.shiny ? 0.35 : 0.08,
+    color: textured ? 0xffffff : b.color,
+    map: textured ? makeBlockTexture(id) : null,
+    metalness: b.shiny ? 0.3 : 0.05,
     roughness: b.shiny ? 0.35 : 0.85,
     transparent: !!b.transparent,
     opacity: b.opacity ?? 1,
@@ -1191,6 +1321,18 @@ function makeAnimalMesh(type) {
   const white = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.6 });
   const pink = new THREE.MeshStandardMaterial({ color: 0xffa0c0, roughness: 0.6 });
 
+  // Cute eyes: white sparkle + dark pupil, mirrored left/right
+  function addEyes(y, z, spread = 0.08, size = 0.045) {
+    for (const s of [-1, 1]) {
+      const eye = new THREE.Mesh(new THREE.SphereGeometry(size, 8, 8), white);
+      eye.position.set(s * spread, y, z);
+      g.add(eye);
+      const pupil = new THREE.Mesh(new THREE.SphereGeometry(size * 0.55, 6, 6), dark);
+      pupil.position.set(s * spread, y, z + size * 0.6);
+      g.add(pupil);
+    }
+  }
+
   if (type === 'fox' || type === 'arctic_fox') {
     const body = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.35, 0.7), mat); body.position.y = 0.35; g.add(body);
     const head = new THREE.Mesh(new THREE.BoxGeometry(0.32, 0.28, 0.32), mat); head.position.set(0, 0.45, 0.4); g.add(head);
@@ -1201,6 +1343,7 @@ function makeAnimalMesh(type) {
     for (const [x, z] of [[-0.12, 0.2], [0.12, 0.2], [-0.12, -0.2], [0.12, -0.2]]) {
       const leg = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.25, 0.1), mat); leg.position.set(x, 0.12, z); g.add(leg);
     }
+    addEyes(0.5, 0.55, 0.09, 0.04);
   } else if (type === 'cat') {
     const body = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.3, 0.55), mat); body.position.y = 0.3; g.add(body);
     const head = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.28, 0.28), mat); head.position.set(0, 0.42, 0.32); g.add(head);
@@ -1210,6 +1353,7 @@ function makeAnimalMesh(type) {
     for (const [x, z] of [[-0.1, 0.15], [0.1, 0.15], [-0.1, -0.15], [0.1, -0.15]]) {
       const leg = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.2, 0.08), mat); leg.position.set(x, 0.1, z); g.add(leg);
     }
+    addEyes(0.47, 0.45, 0.08, 0.038);
   } else if (def.bear || type === 'panda') {
     const bodyMat = type === 'panda' ? white : mat;
     const accent = type === 'panda' ? dark : (type === 'polar_bear' ? white : dark);
@@ -1232,10 +1376,12 @@ function makeAnimalMesh(type) {
     beak.rotation.x = Math.PI / 2; beak.position.set(0, 0.55, 0.28); g.add(beak);
     const flipL = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.28, 0.16), dark); flipL.position.set(-0.22, 0.4, 0); g.add(flipL);
     const flipR = flipL.clone(); flipR.position.x = 0.22; g.add(flipR);
+    addEyes(0.62, 0.2, 0.08, 0.042);
   } else if (type === 'seal') {
     const body = new THREE.Mesh(new THREE.SphereGeometry(0.32, 12, 10), mat); body.position.y = 0.28; body.scale.set(1.3, 0.7, 0.85); g.add(body);
     const head = new THREE.Mesh(new THREE.SphereGeometry(0.18, 10, 10), mat); head.position.set(0, 0.32, 0.35); g.add(head);
     const nose = new THREE.Mesh(new THREE.SphereGeometry(0.05, 6, 6), dark); nose.position.set(0, 0.32, 0.5); g.add(nose);
+    addEyes(0.42, 0.44, 0.08, 0.035);
   } else if (type === 'horse') {
     const body = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.45, 0.9), mat); body.position.y = 0.7; g.add(body);
     const neck = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.45, 0.22), mat); neck.position.set(0, 1.0, 0.4); neck.rotation.x = -0.4; g.add(neck);
@@ -1571,6 +1717,13 @@ scene.add(starField);
   );
   moon.position.set(-40, 45, -30);
   starField.add(moon);
+  const moonGlow = new THREE.Sprite(new THREE.SpriteMaterial({
+    map: glowTex('rgba(245,245,255,0.9)', 'rgba(190,200,255,0.35)'),
+    transparent: true, depthWrite: false, fog: false,
+  }));
+  moonGlow.scale.set(26, 26, 1);
+  moonGlow.position.copy(moon.position);
+  starField.add(moonGlow);
   starField.visible = false;
 }
 
@@ -1583,7 +1736,19 @@ const isTouchDevice = (
 );
 if (isTouchDevice) {
   document.body.classList.add('touch');
+  // tablets: fewer pixels + lighter shadows = smooth walking
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 1.6));
+  renderer.setSize(innerWidth, innerHeight);
+  sun.shadow.mapSize.set(1024, 1024);
   document.querySelectorAll('.desktop-only').forEach(el => { el.style.display = 'none'; });
+  const tips = document.querySelector('#overlay .tips');
+  if (tips) {
+    tips.innerHTML = `<strong>How to play on this tablet</strong><br>
+      • 👣 Touch the <strong>left side</strong> &amp; drag your finger — walk anywhere<br>
+      • 👀 Drag on the <strong>right side</strong> — look around<br>
+      • ➕ <strong>Tap</strong> a spot to place a block · ✋ <strong>hold</strong> a block to break it<br>
+      • 🦋 <strong>Fly</strong> button up top · 💾 saves on this tablet`;
+  }
 }
 
 const MAX_PITCH = 1.15;
@@ -1636,10 +1801,10 @@ document.getElementById('startBtn').onclick = () => {
   saveGame(true);
   const hint = document.getElementById('hintBar');
   if (isTouchDevice && hint) {
-    hint.innerHTML = '🔵 Left = <b>MOVE</b> · 🔵 Right = <b>LOOK</b> · Drag screen · 👀 CENTER if stuck on sky';
+    hint.innerHTML = '👣 Drag <b>left side</b> = walk · 👀 drag <b>right side</b> = look · <b>tap</b> = place · <b>hold</b> = break';
   }
   toast(isTouchDevice
-    ? `Hi ${character.name}! Use the pink circles — 👀 CENTER if stuck looking up`
+    ? `Hi ${character.name}! Drag the left side of the screen to walk 💕`
     : (loaded
       ? `Welcome back, ${character.name}! 💾 Loaded this tablet’s world`
       : `Hi ${character.name}! 🌙 Your world will save on this tablet`));
@@ -1655,86 +1820,98 @@ canvas.addEventListener('click', () => {
   if (!isTouchDevice && !pointerLocked) canvas.requestPointerLock();
 });
 
-// ─── Touch controls (tablets) — big circles + finger drag ────
+// ─── Touch controls (tablets) — move & look with your finger ─
+// Left ~44% of the screen: touch anywhere and a joystick appears
+// under the finger — drag to walk. Rest of the screen: drag to
+// look around, quick tap = place a block there, hold = break.
 const touchMove = { x: 0, z: 0 };
-const touchLook = { x: 0, y: 0 };
-function bindStick(zoneId, knobId, onMove, onEnd) {
-  const zone = document.getElementById(zoneId);
-  const knob = document.getElementById(knobId);
-  if (!zone || !knob) return;
-  let active = null;
-  function center() {
-    const r = zone.getBoundingClientRect();
-    return {
-      x: r.left + r.width / 2,
-      y: r.top + r.height * 0.54,
-      max: Math.min(r.width, r.height) * 0.32,
-    };
-  }
-  function handle(clientX, clientY) {
-    const c = center();
-    let dx = clientX - c.x;
-    let dy = clientY - c.y;
-    const len = Math.hypot(dx, dy) || 1;
-    if (len > c.max) { dx = (dx / len) * c.max; dy = (dy / len) * c.max; }
-    knob.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
-    const nx = Math.abs(dx / c.max) < 0.12 ? 0 : dx / c.max;
-    const ny = Math.abs(dy / c.max) < 0.12 ? 0 : dy / c.max;
-    onMove(nx, ny);
-  }
-  function end(e) {
-    if (active !== e.pointerId) return;
-    active = null;
-    knob.style.transform = 'translate(-50%, -50%)';
-    onEnd();
-  }
-  zone.addEventListener('pointerdown', e => {
-    active = e.pointerId;
-    zone.setPointerCapture(e.pointerId);
-    handle(e.clientX, e.clientY);
-    e.preventDefault();
-    e.stopPropagation();
-  });
-  zone.addEventListener('pointermove', e => {
-    if (active !== e.pointerId) return;
-    handle(e.clientX, e.clientY);
-    e.preventDefault();
-  });
-  zone.addEventListener('pointerup', end);
-  zone.addEventListener('pointercancel', end);
-}
-bindStick('moveZone', 'moveKnob', (x, y) => {
-  touchMove.x = x;
-  touchMove.z = y;
-}, () => { touchMove.x = 0; touchMove.z = 0; });
-bindStick('lookZone', 'lookKnob', (x, y) => {
-  touchLook.x = x;
-  touchLook.y = y;
-}, () => { touchLook.x = 0; touchLook.y = 0; });
+(function bindTouchControls() {
+  const layer = document.getElementById('touchLayer');
+  const joyBase = document.getElementById('joyBase');
+  const joyKnob = document.getElementById('joyKnob');
+  if (!layer || !joyBase || !joyKnob) return;
 
-// Drag finger on the middle of the screen to look around
-(function bindLookDrag() {
-  const layer = document.getElementById('lookDragLayer');
-  if (!layer) return;
-  let pid = null, lx = 0, ly = 0;
+  const JOY_R = 56;        // px of drag for full walking speed
+  const TAP_SLOP = 14;     // finger wobble allowed for tap / hold
+  const HOLD_MS = 650;     // hold a block this long to break it
+  const move = { id: null, ox: 0, oy: 0 };
+  const look = { id: null, x: 0, y: 0, sx: 0, sy: 0, moved: 0, timer: null, broke: false };
+
+  function setJoy(dx, dy) {
+    const len = Math.hypot(dx, dy);
+    if (len > JOY_R) { dx = (dx / len) * JOY_R; dy = (dy / len) * JOY_R; }
+    joyKnob.style.transform = `translate(${dx}px, ${dy}px)`;
+    touchMove.x = Math.abs(dx) < 6 ? 0 : dx / JOY_R;
+    touchMove.z = Math.abs(dy) < 6 ? 0 : dy / JOY_R;
+  }
+  function endMove() {
+    move.id = null;
+    touchMove.x = 0; touchMove.z = 0;
+    joyBase.style.display = 'none';
+  }
+  function clearHold() {
+    if (look.timer) { clearTimeout(look.timer); look.timer = null; }
+  }
+  function holdBreak() {
+    // finger held still on a block: break it (and keep breaking while held)
+    if (look.id === null || look.moved >= TAP_SLOP) return;
+    look.broke = true;
+    breakBlock(screenDir(look.x, look.y));
+    look.timer = setTimeout(holdBreak, HOLD_MS);
+  }
+  function endLook(e, canceled) {
+    if (look.id !== e.pointerId) return;
+    clearHold();
+    // released before the hold kicked in & finger stayed put = a tap:
+    // place a block right where she touched
+    if (!canceled && !look.broke && look.moved < TAP_SLOP) {
+      placeBlock(screenDir(look.sx, look.sy));
+    }
+    look.id = null;
+  }
+
   layer.addEventListener('pointerdown', e => {
-    pid = e.pointerId;
-    lx = e.clientX; ly = e.clientY;
-    try { layer.setPointerCapture(e.pointerId); } catch {}
     e.preventDefault();
+    try { layer.setPointerCapture(e.pointerId); } catch {}
+    if (e.clientX < innerWidth * 0.44 && move.id === null) {
+      move.id = e.pointerId;
+      move.ox = e.clientX; move.oy = e.clientY;
+      joyBase.style.left = e.clientX + 'px';
+      joyBase.style.top = e.clientY + 'px';
+      joyBase.style.display = 'block';
+      setJoy(0, 0);
+    } else if (look.id === null) {
+      look.id = e.pointerId;
+      look.x = look.sx = e.clientX;
+      look.y = look.sy = e.clientY;
+      look.moved = 0; look.broke = false;
+      clearHold();
+      look.timer = setTimeout(holdBreak, HOLD_MS);
+    }
   });
   layer.addEventListener('pointermove', e => {
-    if (pid !== e.pointerId) return;
-    const dx = e.clientX - lx;
-    const dy = e.clientY - ly;
-    lx = e.clientX; ly = e.clientY;
-    player.yaw -= dx * 0.0055;
-    player.pitch -= dy * 0.0045;
-    clampPitch();
-    e.preventDefault();
+    if (e.pointerId === move.id) {
+      setJoy(e.clientX - move.ox, e.clientY - move.oy);
+      e.preventDefault();
+    } else if (e.pointerId === look.id) {
+      const dx = e.clientX - look.x;
+      const dy = e.clientY - look.y;
+      look.moved += Math.abs(dx) + Math.abs(dy);
+      look.x = e.clientX; look.y = e.clientY;
+      player.yaw -= dx * 0.006;
+      player.pitch -= dy * 0.0046;
+      clampPitch();
+      e.preventDefault();
+    }
   });
-  layer.addEventListener('pointerup', e => { if (pid === e.pointerId) pid = null; });
-  layer.addEventListener('pointercancel', e => { if (pid === e.pointerId) pid = null; });
+  layer.addEventListener('pointerup', e => {
+    if (e.pointerId === move.id) endMove();
+    else endLook(e, false);
+  });
+  layer.addEventListener('pointercancel', e => {
+    if (e.pointerId === move.id) endMove();
+    else endLook(e, true);
+  });
 })();
 
 function bindHold(btnId, code) {
@@ -1751,9 +1928,7 @@ bindHold('touchJump', 'Space');
 bindHold('touchDown', 'KeyC');
 document.getElementById('touchPlace')?.addEventListener('pointerdown', e => { placeBlock(); e.preventDefault(); e.stopPropagation(); });
 document.getElementById('touchBreak')?.addEventListener('pointerdown', e => { breakBlock(); e.preventDefault(); e.stopPropagation(); });
-document.getElementById('touchFly')?.addEventListener('pointerdown', e => { toggleFly(); e.preventDefault(); e.stopPropagation(); });
-document.getElementById('touchCenter')?.addEventListener('pointerdown', e => { centerLook(); e.preventDefault(); e.stopPropagation(); });
-document.getElementById('touchSearch')?.addEventListener('pointerdown', e => { openSearch(); e.preventDefault(); e.stopPropagation(); });
+document.getElementById('centerBtn')?.addEventListener('click', centerLook);
 
 window.addEventListener('keydown', e => {
   keys[e.code] = true;
@@ -1790,11 +1965,19 @@ canvas.addEventListener('mousedown', e => {
 canvas.addEventListener('contextmenu', e => e.preventDefault());
 
 // ─── Raycast blocks ──────────────────────────────────────────
-const _ray = new THREE.Raycaster();
-const _mouse = new THREE.Vector2(0, 0);
+/** Aim ray through a screen point (for touch: build where the finger taps). */
+function screenDir(clientX, clientY) {
+  const v = new THREE.Vector3(
+    (clientX / innerWidth) * 2 - 1,
+    -(clientY / innerHeight) * 2 + 1,
+    0.5
+  );
+  v.unproject(camera).sub(camera.position).normalize();
+  return v;
+}
 
-function raycastBlock(maxDist = 7) {
-  const dir = lookAimDir();
+function raycastBlock(maxDist = 7, dirOverride = null) {
+  const dir = dirOverride || lookAimDir();
   const origin = camera.position.clone();
 
   // DDA voxel traversal
@@ -1828,8 +2011,8 @@ function raycastBlock(maxDist = 7) {
   return null;
 }
 
-function placeBlock() {
-  const hit = raycastBlock();
+function placeBlock(dir = null) {
+  const hit = raycastBlock(7, dir);
   if (!hit || !hit.prev) return;
   const id = hotbar[selected];
   if (!id || !BLOCKS[id]) return;
@@ -1854,8 +2037,8 @@ function placeBlock() {
   saveGame(true);
 }
 
-function breakBlock() {
-  const hit = raycastBlock();
+function breakBlock(dir = null) {
+  const hit = raycastBlock(7, dir);
   if (!hit) return;
   // don't break bedrock layer y=0 completely empty — allow but keep floor
   if (hit.y <= 0 && BLOCKS[hit.id] && hit.id !== 'cloud') {
@@ -1879,13 +2062,6 @@ function solidAt(x, y, z) {
 }
 
 function updatePlayer(dt) {
-  // Touch look stick — up on circle = look up (gentle)
-  if (isTouchDevice && (touchLook.x || touchLook.y)) {
-    player.yaw -= touchLook.x * 2.4 * dt;
-    player.pitch -= touchLook.y * 2.0 * dt; // stick up (neg y) raises pitch
-    clampPitch();
-  }
-
   const speed = keys['ShiftLeft'] || keys['ShiftRight'] ? 9 : 5.5;
   const forward = lookForwardXZ();
   const right = lookRightXZ();
@@ -2104,7 +2280,7 @@ function openSearch() {
 }
 function closeSearch() {
   document.getElementById('searchPanel').classList.remove('open');
-  canvas.requestPointerLock();
+  if (!isTouchDevice) canvas.requestPointerLock();
 }
 
 function renderTabs() {
@@ -2193,6 +2369,9 @@ document.getElementById('spawnAnimalBtn').onclick = () => {
 function setDayNight(isNight) {
   night = isNight;
   const btn = document.getElementById('dayBtn');
+  skyMat.map = night ? skyNightTex : skyDayTex;
+  sunSprite.visible = !night;
+  for (const c of clouds) c.material.opacity = night ? 0.16 : 0.75;
   if (night) {
     scene.background = new THREE.Color(0x120820);
     scene.fog.color.set(0x1a1030);
@@ -2241,6 +2420,9 @@ function updateFlyUI() {
   const badge = document.getElementById('flyBadge');
   const btn = document.getElementById('flyBtn');
   const hint = document.getElementById('hintBar');
+  document.body.classList.toggle('flying', player.flying);
+  const jumpBtn = document.getElementById('touchJump');
+  if (jumpBtn) jumpBtn.innerHTML = player.flying ? '⬆️<br>UP' : '⬆️<br>JUMP';
   if (badge) badge.classList.toggle('on', player.flying);
   if (btn) {
     btn.classList.toggle('fly-on', player.flying);
@@ -2249,8 +2431,8 @@ function updateFlyUI() {
   if (hint) {
     if (isTouchDevice) {
       hint.innerHTML = player.flying
-        ? '🦋 <b>FLYING</b> — ⬆️ up · ⬇️ down · MOVE circle · 👀 CENTER if stuck'
-        : 'Left circle <b>MOVE</b> · Right circle <b>LOOK</b> · Drag screen · 🦋 FLY · 👀 CENTER';
+        ? '🦋 <b>FLYING</b> — hold ⬆️ up · ⬇️ down · drag left side to glide · 🦋 Fly to land'
+        : '👣 Drag <b>left side</b> = walk · 👀 drag <b>right side</b> = look · <b>tap</b> = place · <b>hold</b> = break';
     } else {
       hint.innerHTML = player.flying
         ? '🦋 <b>FLYING</b> — <b>Space</b> up · <b>C</b> down · <b>WASD</b> move · <b>F</b> to land'
@@ -2289,42 +2471,176 @@ function playPlace() { blip(520, 0.08, 'triangle', 0.06); blip(780, 0.1, 'sine',
 function playBreak() { blip(180, 0.1, 'square', 0.05); }
 function playEat() { blip(400, 0.08, 'sine', 0.07); blip(600, 0.12, 'sine', 0.05); }
 
-// ─── Free relaxing Japanese-inspired ambient music (procedural) ──
-// Soft pentatonic melody + warm pad. No external files needed — free forever.
+// ─── Relaxing Japanese koto music ────────────────────────────
+// Real plucked-string synthesis (Karplus-Strong) through a soft
+// hall reverb — sounds like an actual koto, works fully offline,
+// no files needed. Prefer a real recording? Drop any openly
+// licensed track named `music.mp3` in the repo root and the game
+// automatically plays that instead (see README for sources).
 let musicOn = true;
 let musicStarted = false;
 let musicNodes = [];
 let musicMaster = null;
 let musicTimer = null;
-const MUSIC_VOL = 0.42; // master volume (louder & clear)
+let musicReverb = null;
+let musicFile = null;      // <audio> element when music.mp3 exists
+let musicFileMode = false;
+const MUSIC_VOL = 0.5;
+const MUSIC_FILE_VOL = 0.55;
 
-// Hirajōshi / in-sen flavored pentatonic (relaxing Japanese feel), A minor-ish
+// Hirajōshi — the classic "Sakura Sakura" koto tuning: A B C E F
 const SCALE = [
   220.00, // A3
-  233.08, // Bb
-  277.18, // C#
-  293.66, // D
-  349.23, // F
+  246.94, // B3
+  261.63, // C4
+  329.63, // E4
+  349.23, // F4
   440.00, // A4
-  466.16, // Bb
-  554.37, // C#
-  587.33, // D
-  698.46, // F
+  493.88, // B4
+  523.25, // C5
+  659.26, // E5
+  698.46, // F5
 ];
+
+function tryMusicFile() {
+  return new Promise((resolve) => {
+    let done = false;
+    const finish = (el) => { if (!done) { done = true; resolve(el); } };
+    const el = new Audio('./music.mp3');
+    el.loop = true;
+    el.volume = MUSIC_FILE_VOL;
+    el.addEventListener('canplaythrough', () => finish(el), { once: true });
+    el.addEventListener('error', () => finish(null), { once: true });
+    setTimeout(() => finish(el.readyState >= 3 ? el : null), 3500);
+    el.load();
+  });
+}
 
 function startMusic() {
   ensureAudio();
   if (musicStarted) {
     if (actx.state === 'suspended') actx.resume();
-    if (musicMaster) musicMaster.gain.setTargetAtTime(musicOn ? MUSIC_VOL : 0, actx.currentTime, 0.2);
+    if (musicFileMode && musicFile) {
+      if (musicOn) musicFile.play().catch(() => {});
+    } else if (musicMaster) {
+      musicMaster.gain.setTargetAtTime(musicOn ? MUSIC_VOL : 0, actx.currentTime, 0.2);
+    }
     return;
   }
   musicStarted = true;
+  tryMusicFile().then((el) => {
+    if (el) {
+      musicFileMode = true;
+      musicFile = el;
+      if (musicOn) {
+        el.play().catch(() => {
+          // Autoplay blocked outside the original tap — retry on next touch
+          document.addEventListener('pointerdown', () => {
+            if (musicOn && musicFile) musicFile.play().catch(() => {});
+          }, { once: true });
+        });
+      }
+    } else {
+      startKotoSynth();
+    }
+    updateMusicBtn();
+  });
+}
+
+// Karplus-Strong plucked string — rendered once per note & cached
+const kotoCache = new Map();
+function kotoBuffer(freq) {
+  const k = Math.round(freq * 10);
+  if (kotoCache.has(k)) return kotoCache.get(k);
+  const sr = actx.sampleRate;
+  const N = Math.floor(sr * 2.4);
+  const buf = actx.createBuffer(1, N, sr);
+  const d = buf.getChannelData(0);
+  const period = Math.max(2, Math.round(sr / freq));
+  let prev = 0;
+  for (let i = 0; i < period; i++) {
+    const n = Math.random() * 2 - 1;
+    d[i] = (n + prev) * 0.5; // softened noise burst = warm pluck
+    prev = n;
+  }
+  for (let i = period; i < N; i++) {
+    d[i] = 0.498 * (d[i - period] + d[i - period + 1]);
+  }
+  kotoCache.set(k, buf);
+  return buf;
+}
+
+function kotoNote(freq, when, vol = 0.4) {
+  if (!musicMaster) return;
+  const src = actx.createBufferSource();
+  src.buffer = kotoBuffer(freq);
+  const g = actx.createGain();
+  g.gain.value = vol;
+  src.connect(g);
+  g.connect(musicMaster);
+  if (musicReverb) g.connect(musicReverb);
+  src.start(when);
+  src.stop(when + 2.5);
+}
+
+// Gentle sakura-like phrases (indexes into SCALE)
+const PHRASES = [
+  [0, 2, 3, 5],
+  [5, 4, 3, 2, 0],
+  [3, 5, 7, 5],
+  [7, 8, 7, 5, 3],
+  [2, 3, 2, 0],
+  [5, 7, 9],
+  [0, 3, 5, 8],
+  [4, 3, 1, 0],
+];
+
+function schedulePhrase() {
+  if (!musicStarted || !musicOn || musicFileMode) { musicTimer = null; return; }
+  const t = actx.currentTime + 0.1;
+  const ph = PHRASES[(Math.random() * PHRASES.length) | 0];
+  let dt = 0;
+  for (const idx of ph) {
+    const f = SCALE[idx % SCALE.length];
+    kotoNote(f, t + dt, 0.4 + Math.random() * 0.15);
+    if (Math.random() < 0.3) kotoNote(f * 2, t + dt + 0.03, 0.1); // octave shimmer
+    dt += 0.5 + Math.random() * 0.45;
+  }
+  if (Math.random() < 0.18) {
+    // distant wind chimes
+    const base = 1300 + Math.random() * 420;
+    const steps = [1, 1.19, 1.5, 1.78];
+    for (let i = 0; i < 3 + ((Math.random() * 3) | 0); i++) {
+      kotoNote(base * steps[i % 4], t + dt + i * 0.15, 0.045);
+    }
+  }
+  musicTimer = setTimeout(schedulePhrase, (dt + 1.8 + Math.random() * 2.4) * 1000);
+}
+
+function startKotoSynth() {
   musicMaster = actx.createGain();
   musicMaster.gain.value = 0;
   musicMaster.connect(actx.destination);
 
-  // Warm low pad (two detuned sines)
+  // Generated hall reverb — lush tails, still zero files
+  musicReverb = actx.createConvolver();
+  const sr = actx.sampleRate;
+  const rl = Math.floor(sr * 3.2);
+  const ir = actx.createBuffer(2, rl, sr);
+  for (let ch = 0; ch < 2; ch++) {
+    const dd = ir.getChannelData(ch);
+    for (let i = 0; i < rl; i++) {
+      dd[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / rl, 3.1);
+    }
+  }
+  musicReverb.buffer = ir;
+  const wet = actx.createGain();
+  wet.gain.value = 0.6;
+  musicReverb.connect(wet);
+  wet.connect(musicMaster);
+  musicNodes.push(musicReverb, wet);
+
+  // Warm low pad (detuned sines) + gentle breeze
   function makePad(freq, type, vol) {
     const o = actx.createOscillator();
     o.type = type;
@@ -2333,18 +2649,15 @@ function startMusic() {
     g.gain.value = vol;
     const f = actx.createBiquadFilter();
     f.type = 'lowpass';
-    f.frequency.value = 1200;
+    f.frequency.value = 900;
     o.connect(f); f.connect(g); g.connect(musicMaster);
     o.start();
     musicNodes.push(o, g, f);
-    return { o, g, f };
   }
-  makePad(110, 'sine', 0.38);
-  makePad(110.4, 'sine', 0.28);
-  makePad(164.8, 'triangle', 0.14);
-  makePad(220, 'sine', 0.08); // soft higher layer
+  makePad(110, 'sine', 0.3);
+  makePad(110.4, 'sine', 0.22);
+  makePad(220, 'sine', 0.06);
 
-  // Gentle noise breeze filtered
   const bufLen = actx.sampleRate * 3;
   const noiseBuf = actx.createBuffer(1, bufLen, actx.sampleRate);
   const nd = noiseBuf.getChannelData(0);
@@ -2357,51 +2670,13 @@ function startMusic() {
   nf.frequency.value = 600;
   nf.Q.value = 0.4;
   const ng = actx.createGain();
-  ng.gain.value = 0.06;
+  ng.gain.value = 0.05;
   noise.connect(nf); nf.connect(ng); ng.connect(musicMaster);
   noise.start();
   musicNodes.push(noise, nf, ng);
 
-  // Fade in
   musicMaster.gain.setTargetAtTime(MUSIC_VOL, actx.currentTime, 1.2);
-
-  // Sparse pentatonic notes (koto-ish plucks via triangle + quick decay)
-  let step = 0;
-  function scheduleNotes() {
-    if (!musicStarted || !musicOn) return;
-    const t = actx.currentTime;
-    const n = 1 + (Math.random() > 0.55 ? 1 : 0);
-    for (let i = 0; i < n; i++) {
-      const note = SCALE[(step + i * 2 + (Math.random() * 3 | 0)) % SCALE.length];
-      const when = t + i * 0.35 + Math.random() * 0.1;
-      pluckNote(note, when, 0.14 + Math.random() * 0.05);
-      if (Math.random() > 0.75) pluckNote(note * 2, when + 0.05, 0.07);
-    }
-    step = (step + 1) % SCALE.length;
-    const wait = 1600 + Math.random() * 900;
-    musicTimer = setTimeout(scheduleNotes, wait);
-  }
-  scheduleNotes();
-  updateMusicBtn();
-}
-
-function pluckNote(freq, when, vol) {
-  if (!actx || !musicMaster) return;
-  const o = actx.createOscillator();
-  o.type = 'triangle';
-  o.frequency.setValueAtTime(freq, when);
-  o.frequency.exponentialRampToValueAtTime(freq * 0.98, when + 1.2);
-  const g = actx.createGain();
-  g.gain.setValueAtTime(0.0001, when);
-  g.gain.exponentialRampToValueAtTime(vol, when + 0.03);
-  g.gain.exponentialRampToValueAtTime(0.0001, when + 1.8);
-  const f = actx.createBiquadFilter();
-  f.type = 'lowpass';
-  f.frequency.setValueAtTime(2400, when);
-  f.frequency.exponentialRampToValueAtTime(900, when + 1.2);
-  o.connect(f); f.connect(g); g.connect(musicMaster);
-  o.start(when);
-  o.stop(when + 2);
+  schedulePhrase();
 }
 
 function toggleMusic() {
@@ -2409,26 +2684,20 @@ function toggleMusic() {
   musicOn = !musicOn;
   if (!musicStarted) {
     if (musicOn) startMusic();
-    updateMusicBtn();
-    toast(musicOn ? 'Soft Japanese-style music on 🎐' : 'Music muted 🔇');
-    return;
-  }
-  if (musicMaster) {
+  } else if (musicFileMode && musicFile) {
+    if (musicOn) musicFile.play().catch(() => {});
+    else musicFile.pause();
+  } else if (musicMaster) {
     musicMaster.gain.setTargetAtTime(musicOn ? MUSIC_VOL : 0, actx.currentTime, 0.4);
-  }
-  if (!musicOn && musicTimer) {
-    clearTimeout(musicTimer);
-    musicTimer = null;
-  } else if (musicOn && !musicTimer) {
-    (function loop() {
-      if (!musicOn) { musicTimer = null; return; }
-      const n = SCALE[(Math.random() * SCALE.length) | 0];
-      pluckNote(n, actx.currentTime, 0.12);
-      musicTimer = setTimeout(loop, 1600 + Math.random() * 900);
-    })();
+    if (!musicOn && musicTimer) {
+      clearTimeout(musicTimer);
+      musicTimer = null;
+    } else if (musicOn && !musicTimer) {
+      schedulePhrase();
+    }
   }
   updateMusicBtn();
-  toast(musicOn ? 'Soft Japanese-style music on 🎐' : 'Music muted 🔇');
+  toast(musicOn ? 'Calm koto music on 🎋' : 'Music muted 🔇');
 }
 
 function updateMusicBtn() {
@@ -2511,6 +2780,12 @@ function frame() {
     p.position.x += Math.sin(performance.now() * 0.001 + p.userData.ph) * dt * 0.4;
     p.rotation.z += dt;
     if (p.position.y < 0) p.position.y = 18 + Math.random() * 10;
+  }
+
+  // drifting clouds
+  for (const c of clouds) {
+    c.position.x += c.userData.sp * dt;
+    if (c.position.x > 130) c.position.x = -130;
   }
 
   // flicker candle flames + spin fans

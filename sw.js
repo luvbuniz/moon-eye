@@ -1,5 +1,5 @@
 // Moon Eye — offline cache for tablets (after first online load)
-const CACHE = 'mooneye-offline-v4';
+const CACHE = 'mooneye-offline-v5';
 const ASSETS = [
   './',
   './index.html',
@@ -10,6 +10,7 @@ const ASSETS = [
   './icon-512.png',
   './icon.svg',
   './vendor/three.module.js',
+  './music.mp3',
   './README.md'
 ];
 
@@ -32,6 +33,23 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const req = event.request;
   if (req.method !== 'GET') return;
+
+  // Page loads: network-first so updates arrive right away when online,
+  // cached copy when offline.
+  if (req.mode === 'navigate') {
+    event.respondWith(
+      fetch(req).then((res) => {
+        if (res && res.ok) {
+          const copy = res.clone();
+          caches.open(CACHE).then((cache) => cache.put('./index.html', copy)).catch(() => {});
+        }
+        return res;
+      }).catch(() => caches.match('./index.html'))
+    );
+    return;
+  }
+
+  // Everything else: cache-first for instant offline play.
   event.respondWith(
     caches.match(req).then((cached) => {
       if (cached) return cached;
@@ -41,9 +59,6 @@ self.addEventListener('fetch', (event) => {
           caches.open(CACHE).then((cache) => cache.put(req, copy)).catch(() => {});
         }
         return res;
-      }).catch(() => {
-        if (req.mode === 'navigate') return caches.match('./index.html');
-        return cached;
       });
     })
   );
