@@ -1,5 +1,5 @@
 // Moon Eye — offline cache for tablets (after first online load)
-const CACHE = 'mooneye-offline-v5';
+const CACHE = 'mooneye-offline-v6';
 const ASSETS = [
   './',
   './index.html',

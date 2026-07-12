@@ -45,8 +45,9 @@ Kids do not share saves across tablets.
 | **Tap** a spot | Place a block right there |
 | **Hold** a block (~0.7s) | Break it (keep holding to break more) |
 | ➕ PLACE / ✕ BREAK buttons | Place / break at the center crosshair |
-| ⬆️ JUMP | Jump (hold to fly up in fly mode) |
-| ⬇️ DOWN | Fly down (shows while flying) |
+| ⬆️ JUMP | Jump (hold to fly / swim up) |
+| ⬇️ DOWN | Fly or dive down (shows while flying or swimming) |
+| 🏊 Walk into water | Swim! Hold ⬆️ to surface, ⬇️ to dive with the sea creatures |
 | 🦋 Fly / 🔍 Search / 👀 Straight | Top-right buttons |
 
 ### ⌨️ Keyboard (computer)
@@ -55,7 +56,7 @@ Kids do not share saves across tablets.
 |-------|--------|
 | WASD | Move |
 | Mouse | Look |
-| Space / C | Fly up / down (fly mode) |
+| Space / C | Fly or swim up / down |
 | F | Toggle fly |
 | Left click | Place |
 | Right click | Break |
