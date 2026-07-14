@@ -374,7 +374,17 @@
       width: 90px; height: 90px; font-size: 0.82rem;
     }
     #touchDown { visibility: hidden; pointer-events: none; }
-    body.flying #touchDown { visibility: visible; pointer-events: auto; }
+    body.flying #touchDown, body.swimming #touchDown { visibility: visible; pointer-events: auto; }
+
+    /* Underwater view — soft blue wash while diving */
+    #waterOverlay {
+      display: none; position: fixed; inset: 0; z-index: 15; pointer-events: none;
+      background:
+        radial-gradient(ellipse at 50% 0%, rgba(120,200,255,0.10), transparent 60%),
+        radial-gradient(ellipse at 50% 110%, rgba(10,60,140,0.35), transparent 70%),
+        rgba(30,120,200,0.22);
+    }
+    body.underwater #waterOverlay { display: block; }
     .install-hint {
       font-size: 0.82rem; color: #8a4070; margin-top: 0.6rem; line-height: 1.4;
     }
@@ -459,6 +469,7 @@
   </div>
 
   <div class="toast" id="toast"></div>
+  <div id="waterOverlay"></div>
 
   <div id="hud">
     <div class="crosshair"></div>
@@ -482,6 +493,7 @@
       <div class="row"><span class="keys"><kbd>1</kbd>–<kbd>9</kbd></span><span>Pick hotbar block</span></div>
       <div class="row"><span class="keys"><kbd>E</kbd></span><span>Eat food</span></div>
       <div class="row"><span class="keys"><kbd>Tab</kbd></span><span>Search everything</span></div>
+      <div class="row"><span class="keys"><kbd>Space</kbd>/<kbd>C</kbd></span><span>Swim up / dive in water</span></div>
       <div class="fly-box">
         <div class="fly-title">🦋 FLY IN THE SKY</div>
         <div class="row"><span class="keys"><kbd>F</kbd></span><span>Turn fly <b>ON / OFF</b></span></div>
@@ -755,8 +767,11 @@ const ANIMALS = {
   seal:        { name: 'Seal',         emoji: '🦭', color: 0xa8b0b8, arctic: true },
   cat:         { name: 'Cat',          emoji: '🐱', color: 0xffb070 },
   dog:         { name: 'Dog',          emoji: '🐶', color: 0xd4a06a },
-  fish:        { name: 'Fish',         emoji: '🐠', color: 0xff80a0 },
-  squid:       { name: 'Squid',        emoji: '🦑', color: 0xc070e0 },
+  fish:        { name: 'Fish',         emoji: '🐠', color: 0xff80a0, aquatic: true },
+  squid:       { name: 'Squid',        emoji: '🦑', color: 0xc070e0, aquatic: true },
+  turtle:      { name: 'Sea Turtle',   emoji: '🐢', color: 0x58c880, aquatic: true },
+  dolphin:     { name: 'Dolphin',      emoji: '🐬', color: 0x7ab8d8, aquatic: true },
+  octopus:     { name: 'Octopus',      emoji: '🐙', color: 0xff8f78, aquatic: true },
 };
 
 const BLOCK_IDS = Object.keys(BLOCKS);
@@ -1205,10 +1220,18 @@ function genWorld() {
         }
         setBlock(x, y, z, id);
       }
-      // water pond
+      // water pond — deep enough to dive down and visit the sea creatures
       if (d > 8 && d < 12 && Math.abs(Math.atan2(z, x)) < 1.2) {
+        for (let y = h; y > 2; y--) setBlock(x, y, z, null); // open the surface
+        const deep = d > 9 && d < 11; // deep middle channel
+        if (deep) {
+          setBlock(x, -2, z, 'sand_pink');
+          setBlock(x, -1, z, 'water');
+          setBlock(x, 0, z, 'water');
+        } else {
+          setBlock(x, 0, z, 'sand_pink');
+        }
         for (let y = 1; y <= 2; y++) setBlock(x, y, z, 'water');
-        setBlock(x, 0, z, 'sand_pink');
       }
       // little icy pond in arctic
       if (arctic && d > 10 && Math.random() > 0.97) {
@@ -1422,7 +1445,45 @@ function makeAnimalMesh(type) {
     const body = new THREE.Mesh(new THREE.SphereGeometry(0.16, 10, 10), mat); body.position.y = 0.2; body.scale.set(1.4, 0.8, 0.7); g.add(body);
     const tail = new THREE.Mesh(new THREE.ConeGeometry(0.1, 0.2, 6), mat); tail.rotation.z = Math.PI / 2; tail.position.set(-0.22, 0.2, 0); g.add(tail);
     const fin = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.08, 0.02), pink); fin.position.set(0, 0.32, 0); g.add(fin);
-    const eye = new THREE.Mesh(new THREE.SphereGeometry(0.03, 6, 6), dark); eye.position.set(0.12, 0.24, 0.08); g.add(eye);
+    const eyeL = new THREE.Mesh(new THREE.SphereGeometry(0.03, 6, 6), dark); eyeL.position.set(0.12, 0.24, 0.08); g.add(eyeL);
+    const eyeR = eyeL.clone(); eyeR.position.z = -0.08; g.add(eyeR);
+  } else if (type === 'turtle') {
+    const shell = new THREE.Mesh(
+      new THREE.SphereGeometry(0.28, 12, 10),
+      new THREE.MeshStandardMaterial({ color: 0x3f7f55, roughness: 0.55 })
+    );
+    shell.position.y = 0.3; shell.scale.set(1.1, 0.6, 1.3); g.add(shell);
+    const head = new THREE.Mesh(new THREE.SphereGeometry(0.11, 8, 8), mat); head.position.set(0, 0.3, 0.42); g.add(head);
+    for (const [x, z] of [[-0.26, 0.22], [0.26, 0.22], [-0.26, -0.24], [0.26, -0.24]]) {
+      const flip = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.05, 0.12), mat);
+      flip.position.set(x, 0.18, z); flip.rotation.y = x > 0 ? -0.5 : 0.5; g.add(flip);
+    }
+    addEyes(0.36, 0.48, 0.05, 0.03);
+  } else if (type === 'dolphin') {
+    const body = new THREE.Mesh(new THREE.SphereGeometry(0.22, 12, 10), mat);
+    body.position.y = 0.35; body.scale.set(0.8, 0.8, 1.9); g.add(body);
+    const snout = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.09, 0.2, 8), mat);
+    snout.rotation.x = Math.PI / 2; snout.position.set(0, 0.32, 0.48); g.add(snout);
+    const finT = new THREE.Mesh(new THREE.ConeGeometry(0.08, 0.18, 6), mat);
+    finT.position.set(0, 0.58, 0); finT.rotation.x = -0.35; g.add(finT);
+    const tailL = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.04, 0.12), mat);
+    tailL.position.set(-0.08, 0.38, -0.44); tailL.rotation.y = 0.5; g.add(tailL);
+    const tailR = tailL.clone(); tailR.position.x = 0.08; tailR.rotation.y = -0.5; g.add(tailR);
+    const belly = new THREE.Mesh(new THREE.SphereGeometry(0.17, 10, 8), white);
+    belly.position.set(0, 0.28, 0.08); belly.scale.set(0.75, 0.6, 1.6); g.add(belly);
+    addEyes(0.44, 0.42, 0.09, 0.032);
+  } else if (type === 'octopus') {
+    const head = new THREE.Mesh(new THREE.SphereGeometry(0.24, 12, 12), mat);
+    head.position.y = 0.45; head.scale.set(1, 1.15, 1); g.add(head);
+    for (let i = 0; i < 8; i++) {
+      const a = (i / 8) * Math.PI * 2;
+      const tent = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.055, 0.42, 5), mat);
+      tent.position.set(Math.cos(a) * 0.14, 0.12, Math.sin(a) * 0.14);
+      tent.rotation.x = Math.cos(a) * 0.5;
+      tent.rotation.z = Math.sin(a) * 0.5;
+      g.add(tent);
+    }
+    addEyes(0.5, 0.2, 0.1, 0.05);
   } else if (type === 'squid') {
     const head = new THREE.Mesh(new THREE.SphereGeometry(0.22, 12, 12), mat); head.position.y = 0.35; head.scale.set(0.9, 1.15, 0.9); g.add(head);
     for (let i = 0; i < 6; i++) {
@@ -1441,12 +1502,35 @@ function makeAnimalMesh(type) {
   return g;
 }
 
+// Nearest open-water surface cell — sea creatures always live in water
+function findWaterSpot(x, z) {
+  let best = null;
+  let bestD = Infinity;
+  for (const [k, id] of world.entries()) {
+    if (id !== 'water') continue;
+    const p = parseKey(k);
+    if (world.get(key(p.x, p.y + 1, p.z)) === 'water') continue; // top cell only
+    const d = Math.hypot(p.x + 0.5 - x, p.z + 0.5 - z);
+    if (d < bestD) { bestD = d; best = p; }
+  }
+  return best;
+}
+
 function spawnAnimal(type, x, z, opts = {}) {
   if (!ANIMALS[type]) type = 'fox';
   const mesh = makeAnimalMesh(type);
-  const aquatic = type === 'fish' || type === 'squid';
+  const aquatic = !!ANIMALS[type].aquatic;
   const flying = type.startsWith('bird');
   let gy = opts.y;
+  if (gy == null && aquatic) {
+    // no matter where she asks for it, it swims to the nearest water
+    const w = findWaterSpot(x, z);
+    if (w) {
+      x = w.x + 0.5;
+      z = w.z + 0.5;
+      gy = w.y + 0.3;
+    }
+  }
   if (gy == null) {
     gy = 0;
     for (let y = 30; y >= 0; y--) {
@@ -1498,14 +1582,32 @@ spawnAnimal('arctic_fox', 8, 22);
 spawnAnimal('arctic_fox', -7, 24);
 spawnAnimal('seal', 2, 27);
 spawnAnimal('seal', -2, 28);
-// Fish & squid in the pond
-spawnAnimal('fish', 9, 2, { y: 1.6 });
-spawnAnimal('fish', 10, 0, { y: 1.5 });
-spawnAnimal('fish', 8, 3, { y: 1.7 });
-spawnAnimal('squid', 10, 1, { y: 1.4 });
-spawnAnimal('squid', 9, -1, { y: 1.55 });
+// Sea creatures in the pond (they find the water on their own)
+spawnAnimal('fish', 9, 2);
+spawnAnimal('fish', 10, 0);
+spawnAnimal('fish', 8, 3);
+spawnAnimal('squid', 10, 1);
+spawnAnimal('squid', 9, -1);
+spawnAnimal('turtle', 10, 2);
+spawnAnimal('dolphin', 9, 3);
+spawnAnimal('octopus', 10, -2);
 
 // ─── Player ──────────────────────────────────────────────────
+let underwaterNow = false;
+let lastDiveToast = -99999;
+function applyFog() {
+  if (underwaterNow) {
+    scene.fog.color.set(0x2a7fc0);
+    scene.fog.density = 0.065;
+  } else if (night) {
+    scene.fog.color.set(0x1a1030);
+    scene.fog.density = 0.02;
+  } else {
+    scene.fog.color.set(0xffd0ec);
+    scene.fog.density = 0.012;
+  }
+}
+
 const player = {
   pos: new THREE.Vector3(0.5, 6, 0.5),
   vel: new THREE.Vector3(),
@@ -1997,7 +2099,9 @@ function raycastBlock(maxDist = 7, dirOverride = null) {
   let prev = null;
   for (let i = 0; i < maxDist * 3; i++) {
     const id = world.get(key(x, y, z));
-    if (id) return { x, y, z, id, prev };
+    // water is see-through for aiming: target what's under it,
+    // and placing into a water cell fills it instead of breaking it
+    if (id && id !== 'water') return { x, y, z, id, prev };
     prev = { x, y, z };
     if (tMaxX < tMaxY) {
       if (tMaxX < tMaxZ) { x += stepX; tMaxX += tDeltaX; }
@@ -2077,6 +2181,12 @@ function updatePlayer(dt) {
   }
   if (wish.lengthSq() > 0) wish.normalize().multiplyScalar(speed);
 
+  // Water check — mermaid swimming & diving
+  const feetWater = getBlock(player.pos.x, player.pos.y + 0.3, player.pos.z) === 'water';
+  const chestWater = getBlock(player.pos.x, player.pos.y + 1.0, player.pos.z) === 'water';
+  const swimming = !player.flying && (feetWater || chestWater);
+  document.body.classList.toggle('swimming', swimming);
+
   if (player.flying) {
     // Creative fly — smooth & easy for sky houses
     const flySpeed = (keys['ShiftLeft'] || keys['ShiftRight']) ? 12 : 7.5;
@@ -2088,6 +2198,15 @@ function updatePlayer(dt) {
     if (keys['KeyC'] || keys['ControlLeft'] || keys['ControlRight']) player.vel.y = -flySpeed;
     // soft float bob so it feels magical
     if (player.vel.y === 0) player.vel.y = Math.sin(performance.now() * 0.003) * 0.2;
+  } else if (swimming) {
+    const swimSpeed = (keys['ShiftLeft'] || keys['ShiftRight']) ? 5.5 : 3.6;
+    if (wish.lengthSq() > 0) wish.normalize().multiplyScalar(swimSpeed);
+    player.vel.x = wish.x;
+    player.vel.z = wish.z;
+    // gentle float: splash momentum fades, then a slow drift downward
+    player.vel.y = THREE.MathUtils.lerp(player.vel.y, -1.1, Math.min(1, dt * 5));
+    if (keys['Space']) player.vel.y = chestWater ? 3.8 : 7.5; // swim up / hop out at surface
+    if (keys['KeyC'] || keys['ControlLeft'] || keys['ControlRight']) player.vel.y = -3.8;
   } else {
     player.vel.x = wish.x;
     player.vel.z = wish.z;
@@ -2132,6 +2251,18 @@ function updatePlayer(dt) {
   // camera — always right-side up (no roll)
   camera.position.set(player.pos.x, player.pos.y + 1.45, player.pos.z);
   applyCameraOrientation();
+
+  // Underwater view: blue wash + misty blue fog while the eyes are below
+  const eyeWater = getBlock(camera.position.x, camera.position.y, camera.position.z) === 'water';
+  if (eyeWater !== underwaterNow) {
+    underwaterNow = eyeWater;
+    document.body.classList.toggle('underwater', underwaterNow);
+    applyFog();
+    if (underwaterNow && performance.now() - lastDiveToast > 20000) {
+      lastDiveToast = performance.now();
+      toast('🧜‍♀️ Diving! Hold ⬆️ to swim up · ⬇️ to go deeper');
+    }
+  }
 }
 
 function collides(pos, r, h) {
@@ -2158,8 +2289,13 @@ function updateAnimals(dt) {
     a.angle += dt * 0.4;
     const ox = Math.cos(a.angle + a.phase) * 3;
     const oz = Math.sin(a.angle * 0.8 + a.phase) * 3;
-    const tx = a.home.x + ox;
-    const tz = a.home.z + oz;
+    let tx = a.home.x + ox;
+    let tz = a.home.z + oz;
+    // sea creatures never wander onto land — steer back home instead
+    if (a.swim && getBlock(tx, a.home.y, tz) !== 'water') {
+      tx = a.home.x;
+      tz = a.home.z;
+    }
     const dx = tx - a.mesh.position.x;
     const dz = tz - a.mesh.position.z;
     a.mesh.position.x += dx * dt * a.speed * 0.4;
@@ -2339,7 +2475,9 @@ function renderSearch() {
       card.onclick = () => {
         const f = lookForwardXZ();
         spawnAnimal(type, player.pos.x + f.x * 3, player.pos.z + f.z * 3);
-        toast(`${def.emoji} A ${def.name} appeared!`);
+        toast(def.aquatic
+          ? `${def.emoji} ${def.name} splashed into the water! 💦`
+          : `${def.emoji} A ${def.name} appeared!`);
         closeSearch();
       };
       grid.appendChild(card);
@@ -2363,7 +2501,9 @@ document.getElementById('spawnAnimalBtn').onclick = () => {
   const type = types[(Math.random() * types.length) | 0];
   const f = lookForwardXZ();
   spawnAnimal(type, player.pos.x + f.x * 3, player.pos.z + f.z * 3);
-  toast(`${ANIMALS[type].emoji} ${ANIMALS[type].name} friend!`);
+  toast(ANIMALS[type].aquatic
+    ? `${ANIMALS[type].emoji} ${ANIMALS[type].name} splashed into the water! 💦`
+    : `${ANIMALS[type].emoji} ${ANIMALS[type].name} friend!`);
 };
 
 function setDayNight(isNight) {
@@ -2372,10 +2512,9 @@ function setDayNight(isNight) {
   skyMat.map = night ? skyNightTex : skyDayTex;
   sunSprite.visible = !night;
   for (const c of clouds) c.material.opacity = night ? 0.16 : 0.75;
+  applyFog();
   if (night) {
     scene.background = new THREE.Color(0x120820);
-    scene.fog.color.set(0x1a1030);
-    scene.fog.density = 0.02;
     sun.intensity = 0.08;
     hemi.intensity = 0.18;
     amb.intensity = 0.12;
@@ -2386,8 +2525,6 @@ function setDayNight(isNight) {
     toast('Nighttime! Light candles & lamps 🕯️🌙✨');
   } else {
     scene.background = new THREE.Color(0xffc8e8);
-    scene.fog.color.set(0xffd0ec);
-    scene.fog.density = 0.012;
     sun.intensity = 1.05;
     hemi.intensity = 0.85;
     amb.intensity = 0.22;
